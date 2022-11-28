@@ -70,23 +70,15 @@ if (isset($_POST['supprimer_client'])) {
     exit();
 }
 
-$filter = '';
+$search = '';
 
 if (isset($_POST['rechercher_client'])) {
     $c = trim($_POST['c']);
-    $filter =  " AND ";
-    $filter .=  " ( ";
-    $filter .= " nom LIKE '%" .  $c . "%'";
-
-    $filter .=  " OR ";
-    $filter .= " numero LIKE '%{$c}%'";
-
-    $filter .=  " OR ";
-    $filter .= " telepone LIKE '%" . trim($_POST['c']) . "%'";
-    $filter .=  " ) ";
+    $search =  " AND nom LIKE '%" . trim($_POST['c']) . "%'";
+    
 }
 
-$clients = $db->query("SELECT * FROM clients WHERE deleted_at IS NULL $filter ")->fetchAll();
+$clients = $db->query("SELECT * FROM clients WHERE deleted_at IS NULL $search ")->fetchAll();
 
 $content_php = ob_get_clean();
 
