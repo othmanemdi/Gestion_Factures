@@ -75,7 +75,7 @@ $search = '';
 if (isset($_POST['rechercher_client'])) {
     $c = trim($_POST['c']);
     $search =  " AND nom LIKE '%" . trim($_POST['c']) . "%'";
-    
+
 }
 
 $clients = $db->query("SELECT * FROM clients WHERE deleted_at IS NULL $search ")->fetchAll();
@@ -92,7 +92,27 @@ ob_start(); ?>
         <li class="breadcrumb-item active" aria-current="pnum">Liste clients</li>
     </ol>
 </nav>
+<?php if (isset($_POST['c'])) : ?>
+                <div class="me-5 col-8 mx-auto">
+                    <h4>La liste des clients est filtré par le mot
+                        <b>
+                            (<?= trim($_POST['c']) ?>)
+                        </b>
+                    </h4>
+                    
+                </div>
+                <?php unset($_POST['c']); ?>
+            <?php endif ?>
 
+            <div>
+
+                <form method="post" class="d-flex py-2   col-6 mx-auto">
+                    <div class="input-group">
+                        <input type="text" class="form-control me-2 rounded-pill" placeholder="Rechercher:" name="c" value="<?= isset($_POST['c']) ? trim($_POST['c']) : '' ?>">
+                        <button class="btn btn-outline-secondary" type="submit" name="rechercher_client">Rechercher</button>
+                    </div>
+                </form>
+            </div>
 <h4 class="fw-bold mb-3">Liste clients</h4>
 
 <div class="card">
@@ -108,27 +128,7 @@ ob_start(); ?>
             Ajouter
         </button>
 
-        <?php if (isset($_POST['c'])) : ?>
-                <div class="me-5">
-                    <h4>La liste des clients est filtré par le mot
-                        <b>
-                            (<?= trim($_POST['c']) ?>)
-                        </b>
-                    </h4>
-                    
-                </div>
-            <?php endif ?>
-
-            <div>
-
-
-                <form method="post">
-                    <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Rechercher:" name="c" value="<?= isset($_POST['c']) ? trim($_POST['c']) : '' ?>">
-                        <button class="btn btn-outline-secondary" type="submit" name="rechercher_client">Rechercher</button>
-                    </div>
-                </form>
-            </div>
+        
         </div>
         <div class="modal fade" id="add_client" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-lg">
@@ -301,11 +301,11 @@ ob_start(); ?>
                         </div>
                         <!-- modal -->
 
-                        <button type="button" class="btn btn-dark btn-sm" data-bs-toggle="modal" data-bs-target="#update_client<?= $c['id'] ?>">
+                        <button type="button" class="btn btn-dark btn-sm" data-bs-toggle="modal" data-bs-target="#update_client_<?= $c['id'] ?>">
                             Modifier
                         </button>
 
-                        <div class="modal fade" id="update_client<?= $c['id'] ?>" tabindex="-1" aria-hidden="true">
+                        <div class="modal fade" id="update_client_<?= $c['id'] ?>" tabindex="-1" aria-hidden="true">
                             <div class="modal-dialog modal-lg">
                                 <div class="modal-content">
                                     <div class="modal-header">
@@ -318,26 +318,28 @@ ob_start(); ?>
                                         <div class="modal-body">
 
                                             <div class="row">
-                                                <div class="col-md-4">
+
+                                            <div class="col-md-4">
                                                     <div class="mb-3">
-                                                        <label for="nom" class="form-label">Nom:</label>
-                                                        <input type="text" class="form-control" id="nom" placeholder="Nom:" value="<?= $c['nom'] ?>">
+                                                        <label for="num" class="form-label">Numéro:</label>
+                                                        <input type="number" class="form-control"name="numero" id="numero" placeholder="Numéro:" value="<?= $c['numero'] ?>">
                                                     </div>
                                                 </div>
                                                 <!-- col -->
 
                                                 <div class="col-md-4">
                                                     <div class="mb-3">
-                                                        <label for="num" class="form-label">Numéro:</label>
-                                                        <input type="number" class="form-control" id="numero" placeholder="Numéro:" value="<?= $c['numero'] ?>">
+                                                        <label for="nom" class="form-label">Nom:</label>
+                                                        <input type="text" class="form-control" name="nom"id="nom" placeholder="Nom:" value="<?= $c['nom'] ?>">
                                                     </div>
                                                 </div>
                                                 <!-- col -->
+
 
                                                 <div class="col-md-4">
                                                     <div class="mb-3">
                                                         <label for="email" class="form-label">Email:</label>
-                                                        <input type="email" class="form-control" id="email" placeholder="Email:" value="<?= $c['email'] ?>">
+                                                        <input type="email" class="form-control" name="email"id="email" placeholder="Email:" value="<?= $c['email'] ?>">
                                                     </div>
                                                 </div>
                                                 <!-- col -->
@@ -345,7 +347,7 @@ ob_start(); ?>
                                                 <div class="col-md-6">
                                                     <div class="mb-3">
                                                         <label for="ville" class="form-label">Ville:</label>
-                                                        <input type="text" class="form-control" id="ville" placeholder="Ville:" value="<?= $c['ville'] ?>">
+                                                        <input type="text" class="form-control" name="ville"id="ville" placeholder="Ville:" value="<?= $c['ville'] ?>">
                                                     </div>
                                                 </div>
                                                 <!-- col -->
@@ -353,15 +355,14 @@ ob_start(); ?>
                                                 <div class="col-md-6">
                                                     <div class="mb-3">
                                                         <label for="tele" class="form-label">Téléphone:</label>
-                                                        <input type="number" class="form-control" id="tele" placeholder="Téléphone:" value="<?= $c['telepone'] ?>">
+                                                        <input type="number" class="form-control" name="telepone"id="tele" placeholder="Téléphone:" value="<?= $c['telepone'] ?>">
                                                     </div>
                                                 </div>
                                                 <!-- col -->
-
                                                 <div class="col-md-12">
                                                     <div class="mb-3">
                                                         <label for="adresse" class="form-label">Adresse:</label>
-                                                        <textarea type="number" class="form-control" id="adresse" placeholder="Adresse:"><?= $c['adresse'] ?>
+                                                        <textarea type="number" class="form-control" name="adresse"id="adresse" placeholder="Adresse:"><?= $c['adresse'] ?>
                                                         </textarea>
                                                         
                                                         
@@ -370,8 +371,9 @@ ob_start(); ?>
                                                 <!-- col -->
                                             </div>
                                             <!-- row -->
+                                            <input type="hidden" name="client_id" value="<?= $c['id'] ?>">
                                         </div>
-                                        <input type="hidden" name="client_id" value="<?= $c['id'] ?>">
+                                        
                                         <!-- modal-body -->
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
