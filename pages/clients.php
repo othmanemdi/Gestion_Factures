@@ -5,22 +5,19 @@ ob_start();
 $title = "Clients";
 
 if (isset($_POST['ajouter_client'])) {
-
+    
     $nom = e($_POST['nom']);
     $numero = (int)$_POST['numero'];
+    $email = e($_POST['email']);
+    $ville = e($_POST['ville']);
+    $telepone = (int)$_POST['telepone'];
+    $adresse = e($_POST['adresse']);
 
-
-$client = $db->prepare("INSERT INTO clients SET 
-            nom = :nom,
-            numero = :numero
-            
-        ");
+$client = $db->prepare("INSERT INTO clients SET nom = :nom,numero = :numero,email = :email,ville = :ville,        telepone = :telepone,adresse = :adresse ");
 
     $client->execute(
         [
-            'nom' => $nom,
-            'numero' => $numero
-            
+            'nom' => $nom,'numero' => $numero,'email' => $email,'ville' => $ville,'telepone' => $telepone,'adresse' => $adresse
         ]
     );
 
@@ -40,9 +37,12 @@ if (isset($_POST['modifier_client'])) {
     $nom = $_POST['nom'];
     $numero = (int)$_POST['numero'];
     $telepone = (int)$_POST['telepone'];
+    $email = e($_POST['email']);
+    $ville = e($_POST['ville']);
+    $adresse = e($_POST['adresse']);
     $client_id = (int) $_POST['client_id'];
 
-    $client = $db->query("UPDATE clients SET nom = '$nom', numero = $numero WHERE id = $client_id");
+    $client = $db->query("UPDATE clients SET nom = '$nom', numero = $numero, email = '$email',ville = '$ville',telepone = $telepone, adresse = '$adresse' WHERE id = $client_id");
 
     if ($client) {
         $_SESSION['flash']['info'] = 'Bien modifier';
@@ -162,7 +162,7 @@ ob_start(); ?>
                                 <div class="col-md-4">
                                     <div class="mb-3">
                                         <label for="email" class="form-label">Email:</label>
-                                        <input type="email" class="form-control" id="email" placeholder="Email:">
+                                        <input type="email" class="form-control" name="email"id="email" placeholder="Email:">
                                     </div>
                                 </div>
                                 <!-- col -->
@@ -170,7 +170,7 @@ ob_start(); ?>
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="ville" class="form-label">Ville:</label>
-                                        <input type="text" class="form-control" id="ville" placeholder="Ville:">
+                                        <input type="text" class="form-control" name="ville" id="ville" placeholder="Ville:">
                                     </div>
                                 </div>
                                 <!-- col -->
@@ -178,7 +178,7 @@ ob_start(); ?>
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="tele" class="form-label">Téléphone:</label>
-                                        <input type="number" class="form-control" id="tele" placeholder="Téléphone:">
+                                        <input type="number" class="form-control" name="telepone" id="tele" placeholder="Téléphone:">
                                     </div>
                                 </div>
                                 <!-- col -->
@@ -186,7 +186,7 @@ ob_start(); ?>
                                 <div class="col-md-12">
                                     <div class="mb-3">
                                         <label for="adresse" class="form-label">Adresse:</label>
-                                        <textarea type="number" class="form-control" id="tele" placeholder="Adresse:"></textarea>
+                                        <textarea type="number" class="form-control" name="adresse"id="adresse" placeholder="Adresse:"></textarea>
                                     </div>
                                 </div>
                                 <!-- col -->
