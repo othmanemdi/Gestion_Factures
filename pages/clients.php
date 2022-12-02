@@ -4,6 +4,103 @@ ob_start();
 // php
 $title = "Clients";
 
+if (isset($_POST['ajouter_client'])) {
+
+    $nom = $_POST['nom'];
+    $numero = (int)$_POST['numero'];
+    $email = $_POST['email'];
+    $ville = $_POST['ville'];
+    $tele = (int)$_POST['tele'];
+    $adresse = $_POST['adresse'];
+
+    $client = $db->prepare("INSERT INTO clients SET 
+            nom = :nom,
+            numero = :numero,
+            email = :email,
+            ville = :ville,
+            tele = :tele,
+            adresse = :adresse
+
+
+        ");
+
+    $client->execute(
+        [
+            'nom' => $nom,
+            'numero' => $numero,
+            'email' => $email,
+            'ville' => $ville,
+            'tele' => $tele,
+            'adresse' => $adresse
+        ]
+    );
+    if ($client) {
+        $_SESSION['flash']['info'] = 'Bien ajouter';
+    } else {
+        $_SESSION['flash']['danger'] = 'Error !!!';
+    }
+
+    header('Location: clients');
+    exit();
+}
+
+
+if (isset($_POST['modifier_client'])) {
+
+    $nom = $_POST['nom'];
+    $numero = (int)$_POST['numero'];
+    $email = $_POST['email'];
+    $ville = $_POST['ville'];
+    $tele = (int)$_POST['tele'];
+    $adresse = $_POST['adresse'];
+    $client_id = (int) $_POST['client_id'];
+
+    $client = $db->query("UPDATE clients SET 
+
+    nom = '$nom', 
+    numero = $numero, 
+    email = '$email', 
+    ville = '$ville', 
+    tele = $tele,
+    adresse = '$adresse'
+
+    WHERE id = $client_id");
+
+    if ($client) {
+        $_SESSION['flash']['info'] = 'Bien modifier';
+    } else {
+        $_SESSION['flash']['danger'] = 'Error !!!';
+    }
+
+    header('Location: clients');
+    exit();
+}
+
+
+
+if (isset($_POST['supprimer_client'])) {
+
+    $client_id = (int) $_POST['client_id'];
+
+    $client = $db->query("UPDATE clients SET deleted_at = NOW() WHERE id = $client_id");
+
+    if ($client) {
+        $_SESSION['flash']['info'] = 'Bien supprimer';
+    } else {
+        $_SESSION['flash']['danger'] = 'Error !!!';
+    }
+
+    header('Location: clients');
+    exit();
+}
+
+// $req = "SELECT * FROM clients WHERE  deleted_c IS NULL";
+
+// $clients = $db->query($req)->fetchAll();
+
+
+
+
 $content_php = ob_get_clean();
 
 
@@ -88,7 +185,7 @@ ob_start(); ?>
                                 <div class="col-md-12">
                                     <div class="mb-3">
                                         <label for="adresse" class="form-label">Adresse:</label>
-                                        <textarea type="number" class="form-control" id="tele" placeholder="Adresse:"></textarea>
+                                        <textarea type="number" class="form-control" id="adrss" placeholder="Adresse:"></textarea>
                                     </div>
                                 </div>
                                 <!-- col -->
@@ -127,567 +224,201 @@ ob_start(); ?>
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>C01</td>
-                    <td>Mohammed Alami</td>
-                    <td>
+                <?php foreach ($clients as $key => $c) : ?>
+                    <tr>
+                        <td>
+                            <?= $c['id'] ?>
+                        </td>
+                        <td>
+                            <?= $c['numero'] ?>
+                        </td>
+                        <td>
+                            <?= $c['nom'] ?>
+                        </td>
+                        <td>
 
-                        <button type="button" class="btn btn-link btn-sm" data-bs-toggle="modal" data-bs-target="#show_client_1">
-                            Afficher
-                        </button>
+                            <button type="button" class="btn btn-link btn-sm" data-bs-toggle="modal" data-bs-target="#show_client_<?= $c['id'] ?>">
+                                Afficher
+                            </button>
 
-                        <div class="modal fade" id="show_client_1" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog modal-lg">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h1 class="modal-title fs-5">
-                                            Afficher
-                                        </h1>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
+                            <div class="modal fade" id="show_client_1" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h1 class="modal-title fs-5">
+                                                Afficher
+                                            </h1>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
 
-                                    <div class="modal-body">
-                                        <dl class="row">
-                                            <dt class="col-sm-3">Nom:</dt>
-                                            <dd class="col-sm-9">Mohammed Alami</dd>
-
-                                            <dt class="col-sm-3">Numéro:</dt>
-                                            <dd class="col-sm-9">C01</dd>
-
-                                            <dt class="col-sm-3">Email:</dt>
-                                            <dd class="col-sm-9">mohammed.alami@gmail.com</dd>
-
-                                            <dt class="col-sm-3">Téléphone:</dt>
-                                            <dd class="col-sm-9">06 80 65 43 38</dd>
-
-                                            <dt class="col-sm-3">Ville:</dt>
-                                            <dd class="col-sm-9">Rabat</dd>
-
-                                            <dt class="col-sm-3">Adresse:</dt>
-                                            <dd class="col-sm-9">
-                                                Lorem ipsum dolor sit amet consectetur adipisicing elit. Vitae ducimus nostrum.
-                                            </dd>
-                                        </dl>
-
-                                    </div>
-                                    <!-- modal-body -->
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-
-                                    </div>
-                                    <!-- modal-footer -->
-
-
-                                </div>
-                                <!-- modal-content -->
-                            </div>
-                            <!-- modal-dialog -->
-                        </div>
-                        <!-- modal -->
-
-                        <button type="button" class="btn btn-link btn-sm" data-bs-toggle="modal" data-bs-target="#update_client_1">
-                            Modifier
-                        </button>
-
-                        <div class="modal fade" id="update_client_1" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog modal-lg">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h1 class="modal-title fs-5">
-                                            Modifier
-                                        </h1>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <form method="post">
                                         <div class="modal-body">
+                                            <dl class="row">
+                                                <dt class="col-sm-3">Nom:</dt>
+                                                <dd class="col-sm-9"><?= $s['nom'] ?></dd>
 
-                                            <div class="row">
-                                                <div class="col-md-4">
-                                                    <div class="mb-3">
-                                                        <label for="nom" class="form-label">Nom:</label>
-                                                        <input type="text" class="form-control" id="nom" placeholder="Nom:" value="mohammed alami">
-                                                    </div>
-                                                </div>
-                                                <!-- col -->
+                                                <dt class="col-sm-3">Numéro:</dt>
+                                                <dd class="col-sm-9"><?= $s['numero'] ?></dd>
 
-                                                <div class="col-md-4">
-                                                    <div class="mb-3">
-                                                        <label for="num" class="form-label">Numéro:</label>
-                                                        <input type="number" class="form-control" id="num" placeholder="Numéro:" value="1">
-                                                    </div>
-                                                </div>
-                                                <!-- col -->
+                                                <dt class="col-sm-3">Email:</dt>
+                                                <dd class="col-sm-9"><?= $s['email'] ?></dd>
 
-                                                <div class="col-md-4">
-                                                    <div class="mb-3">
-                                                        <label for="email" class="form-label">Email:</label>
-                                                        <input type="email" class="form-control" id="email" placeholder="Email:" value="mohammed.alami@gmail.com">
-                                                    </div>
-                                                </div>
-                                                <!-- col -->
+                                                <dt class="col-sm-3">Téléphone:</dt>
+                                                <dd class="col-sm-9"><?= $s['tele'] ?></dd>
 
-                                                <div class="col-md-6">
-                                                    <div class="mb-3">
-                                                        <label for="ville" class="form-label">Ville:</label>
-                                                        <input type="text" class="form-control" id="ville" placeholder="Ville:" value="Rabat">
-                                                    </div>
-                                                </div>
-                                                <!-- col -->
+                                                <dt class="col-sm-3">Ville:</dt>
+                                                <dd class="col-sm-9"><?= $s['ville'] ?></dd>
 
-                                                <div class="col-md-6">
-                                                    <div class="mb-3">
-                                                        <label for="tele" class="form-label">Téléphone:</label>
-                                                        <input type="number" class="form-control" id="tele" placeholder="Téléphone:" value="0680654338">
-                                                    </div>
-                                                </div>
-                                                <!-- col -->
+                                                <dt class="col-sm-3">Adresse:</dt>
+                                                <dd class="col-sm-9"><?= $s['adresse'] ?></dd>
+                                            </dl>
 
-                                                <div class="col-md-12">
-                                                    <div class="mb-3">
-                                                        <label for="adresse" class="form-label">Adresse:</label>
-                                                        <textarea type="number" class="form-control" id="tele" placeholder="Adresse:">Lorem ipsum dolor sit amet consectetur adipisicing elit. Vitae ducimus nostrum.
-                                </textarea>
-                                                        <input type="hidden" value="1">
-                                                    </div>
-                                                </div>
-                                                <!-- col -->
-                                            </div>
-                                            <!-- row -->
                                         </div>
                                         <!-- modal-body -->
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                                            <button type="submit" class="btn btn-success">
+
+                                        </div>
+                                        <!-- modal-footer -->
+
+
+                                    </div>
+                                    <!-- modal-content -->
+                                </div>
+                                <!-- modal-dialog -->
+                            </div>
+                            <!-- modal -->
+
+                            <button type="button" class="btn btn-link btn-sm" data-bs-toggle="modal" data-bs-target="#update_client_<?= $c['id'] ?>">
+                                Modifier
+                            </button>
+
+                            <div class="modal fade" id="update_client_1" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h1 class="modal-title fs-5">
                                                 Modifier
-                                            </button>
+                                            </h1>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
-                                        <!-- modal-footer -->
+                                        <form method="post">
+                                            <div class="modal-body">
 
-                                    </form>
-
-                                </div>
-                                <!-- modal-content -->
-                            </div>
-                            <!-- modal-dialog -->
-                        </div>
-                        <!-- modal -->
-
-                        <button type="button" class="btn btn-link btn-sm" data-bs-toggle="modal" data-bs-target="#delete_client_1">
-                            Supprimer
-                        </button>
-
-                        <div class="modal fade" id="delete_client_1" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog modal-lg">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h1 class="modal-title fs-5">
-                                            Supprimer
-                                        </h1>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <form method="post">
-                                        <div class="modal-body">
-
-                                            <h5 class="text-danger fw-bold">
-                                                Voulez vous vraiment supprimer cette ligne ?
-                                            </h5>
-
-                                        </div>
-                                        <!-- modal-body -->
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                                            <button type="submit" class="btn btn-danger">
-                                                Supprimer
-                                            </button>
-                                        </div>
-                                        <!-- modal-footer -->
-
-                                    </form>
-
-                                </div>
-                                <!-- modal-content -->
-                            </div>
-                            <!-- modal-dialog -->
-                        </div>
-                        <!-- modal -->
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>2</td>
-                    <td>C02</td>
-                    <td>Drisse El Alaoui</td>
-
-                    <td>
-
-                        <button type="button" class="btn btn-link btn-sm" data-bs-toggle="modal" data-bs-target="#show_client_2">
-                            Afficher
-                        </button>
-
-                        <div class="modal fade" id="show_client_2" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog modal-lg">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h1 class="modal-title fs-5">
-                                            Afficher
-                                        </h1>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-
-                                    <div class="modal-body">
-                                        <dl class="row">
-                                            <dt class="col-sm-3">Nom:</dt>
-                                            <dd class="col-sm-9">Mohammed Alami</dd>
-
-                                            <dt class="col-sm-3">Numéro:</dt>
-                                            <dd class="col-sm-9">C01</dd>
-
-                                            <dt class="col-sm-3">Email:</dt>
-                                            <dd class="col-sm-9">mohammed.alami@gmail.com</dd>
-
-                                            <dt class="col-sm-3">Téléphone:</dt>
-                                            <dd class="col-sm-9">06 80 65 43 38</dd>
-
-                                            <dt class="col-sm-3">Ville:</dt>
-                                            <dd class="col-sm-9">Rabat</dd>
-
-                                            <dt class="col-sm-3">Adresse:</dt>
-                                            <dd class="col-sm-9">
-                                                Lorem ipsum dolor sit amet consectetur adipisicing elit. Vitae ducimus nostrum.
-                                            </dd>
-                                        </dl>
-
-                                    </div>
-                                    <!-- modal-body -->
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-
-                                    </div>
-                                    <!-- modal-footer -->
-
-
-                                </div>
-                                <!-- modal-content -->
-                            </div>
-                            <!-- modal-dialog -->
-                        </div>
-                        <!-- modal -->
-
-                        <button type="button" class="btn btn-link btn-sm" data-bs-toggle="modal" data-bs-target="#update_client_2">
-                            Modifier
-                        </button>
-
-                        <div class="modal fade" id="update_client_2" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog modal-lg">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h1 class="modal-title fs-5">
-                                            Modifier
-                                        </h1>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <form method="post">
-                                        <div class="modal-body">
-
-                                            <div class="row">
-                                                <div class="col-md-4">
-                                                    <div class="mb-3">
-                                                        <label for="nom" class="form-label">Nom:</label>
-                                                        <input type="text" class="form-control" id="nom" placeholder="Nom:" value="mohammed alami">
+                                                <div class="row">
+                                                    <div class="col-md-4">
+                                                        <div class="mb-3">
+                                                            <label for="nom" class="form-label">Nom:</label>
+                                                            <input type="text" class="form-control" id="nom" placeholder="Nom:" value="<?= $c['nom'] ?>">
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <!-- col -->
+                                                    <!-- col -->
 
-                                                <div class="col-md-4">
-                                                    <div class="mb-3">
-                                                        <label for="num" class="form-label">Numéro:</label>
-                                                        <input type="number" class="form-control" id="num" placeholder="Numéro:" value="1">
+                                                    <div class="col-md-4">
+                                                        <div class="mb-3">
+                                                            <label for="num" class="form-label">Numéro:</label>
+                                                            <input type="number" class="form-control" id="num" placeholder="Numéro:" value="<?= $c['numero'] ?>">
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <!-- col -->
+                                                    <!-- col -->
 
-                                                <div class="col-md-4">
-                                                    <div class="mb-3">
-                                                        <label for="email" class="form-label">Email:</label>
-                                                        <input type="email" class="form-control" id="email" placeholder="Email:" value="mohammed.alami@gmail.com">
+                                                    <div class="col-md-4">
+                                                        <div class="mb-3">
+                                                            <label for="email" class="form-label">Email:</label>
+                                                            <input type="email" class="form-control" id="email" placeholder="Email:" value="<?= $c['email'] ?>">
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <!-- col -->
+                                                    <!-- col -->
 
-                                                <div class="col-md-6">
-                                                    <div class="mb-3">
-                                                        <label for="ville" class="form-label">Ville:</label>
-                                                        <input type="text" class="form-control" id="ville" placeholder="Ville:" value="Rabat">
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label for="ville" class="form-label">Ville:</label>
+                                                            <input type="text" class="form-control" id="ville" placeholder="Ville:" value="<?= $c['ville'] ?>">
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <!-- col -->
+                                                    <!-- col -->
 
-                                                <div class="col-md-6">
-                                                    <div class="mb-3">
-                                                        <label for="tele" class="form-label">Téléphone:</label>
-                                                        <input type="number" class="form-control" id="tele" placeholder="Téléphone:" value="0680654338">
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label for="tele" class="form-label">Téléphone:</label>
+                                                            <input type="number" class="form-control" id="tele" placeholder="Téléphone:" value="<?= $c['tele'] ?>">
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <!-- col -->
+                                                    <!-- col -->
 
-                                                <div class="col-md-12">
-                                                    <div class="mb-3">
-                                                        <label for="adresse" class="form-label">Adresse:</label>
-                                                        <textarea type="number" class="form-control" id="tele" placeholder="Adresse:">Lorem ipsum dolor sit amet consectetur adipisicing elit. Vitae ducimus nostrum.
-                                </textarea>
-                                                        <input type="hidden" value="1">
-                                                    </div>
-                                                </div>
-                                                <!-- col -->
-                                            </div>
-                                            <!-- row -->
-                                        </div>
-                                        <!-- modal-body -->
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                                            <button type="submit" class="btn btn-success">
-                                                Modifier
-                                            </button>
-                                        </div>
-                                        <!-- modal-footer -->
-
-                                    </form>
-
-                                </div>
-                                <!-- modal-content -->
-                            </div>
-                            <!-- modal-dialog -->
-                        </div>
-                        <!-- modal -->
-
-                        <button type="button" class="btn btn-link btn-sm" data-bs-toggle="modal" data-bs-target="#delete_client_2">
-                            Supprimer
-                        </button>
-
-                        <div class="modal fade" id="delete_client_2" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog modal-lg">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h1 class="modal-title fs-5">
-                                            Supprimer
-                                        </h1>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <form method="post">
-                                        <div class="modal-body">
-
-                                            <h5 class="text-danger fw-bold">
-                                                Voulez vous vraiment supprimer cette ligne ?
-                                            </h5>
-
-                                        </div>
-                                        <!-- modal-body -->
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                                            <button type="submit" class="btn btn-danger">
-                                                Supprimer
-                                            </button>
-                                        </div>
-                                        <!-- modal-footer -->
-
-                                    </form>
-
-                                </div>
-                                <!-- modal-content -->
-                            </div>
-                            <!-- modal-dialog -->
-                        </div>
-                        <!-- modal -->
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>3</td>
-                    <td>C03</td>
-                    <td>Maryam Atid</td>
-                    <td>
-
-                        <button type="button" class="btn btn-link btn-sm" data-bs-toggle="modal" data-bs-target="#show_client_3">
-                            Afficher
-                        </button>
-
-                        <div class="modal fade" id="show_client_3" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog modal-lg">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h1 class="modal-title fs-5">
-                                            Afficher
-                                        </h1>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-
-                                    <div class="modal-body">
-                                        <dl class="row">
-                                            <dt class="col-sm-3">Nom:</dt>
-                                            <dd class="col-sm-9">Mohammed Alami</dd>
-
-                                            <dt class="col-sm-3">Numéro:</dt>
-                                            <dd class="col-sm-9">C01</dd>
-
-                                            <dt class="col-sm-3">Email:</dt>
-                                            <dd class="col-sm-9">mohammed.alami@gmail.com</dd>
-
-                                            <dt class="col-sm-3">Téléphone:</dt>
-                                            <dd class="col-sm-9">06 80 65 43 38</dd>
-
-                                            <dt class="col-sm-3">Ville:</dt>
-                                            <dd class="col-sm-9">Rabat</dd>
-
-                                            <dt class="col-sm-3">Adresse:</dt>
-                                            <dd class="col-sm-9">
-                                                Lorem ipsum dolor sit amet consectetur adipisicing elit. Vitae ducimus nostrum.
-                                            </dd>
-                                        </dl>
-
-                                    </div>
-                                    <!-- modal-body -->
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-
-                                    </div>
-                                    <!-- modal-footer -->
-
-
-                                </div>
-                                <!-- modal-content -->
-                            </div>
-                            <!-- modal-dialog -->
-                        </div>
-                        <!-- modal -->
-
-                        <button type="button" class="btn btn-link btn-sm" data-bs-toggle="modal" data-bs-target="#update_client_3">
-                            Modifier
-                        </button>
-
-                        <div class="modal fade" id="update_client_3" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog modal-lg">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h1 class="modal-title fs-5">
-                                            Modifier
-                                        </h1>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <form method="post">
-                                        <div class="modal-body">
-
-                                            <div class="row">
-                                                <div class="col-md-4">
-                                                    <div class="mb-3">
-                                                        <label for="nom" class="form-label">Nom:</label>
-                                                        <input type="text" class="form-control" id="nom" placeholder="Nom:" value="mohammed alami">
-                                                    </div>
-                                                </div>
-                                                <!-- col -->
-
-                                                <div class="col-md-4">
-                                                    <div class="mb-3">
-                                                        <label for="num" class="form-label">Numéro:</label>
-                                                        <input type="number" class="form-control" id="num" placeholder="Numéro:" value="1">
-                                                    </div>
-                                                </div>
-                                                <!-- col -->
-
-                                                <div class="col-md-4">
-                                                    <div class="mb-3">
-                                                        <label for="email" class="form-label">Email:</label>
-                                                        <input type="email" class="form-control" id="email" placeholder="Email:" value="mohammed.alami@gmail.com">
-                                                    </div>
-                                                </div>
-                                                <!-- col -->
-
-                                                <div class="col-md-6">
-                                                    <div class="mb-3">
-                                                        <label for="ville" class="form-label">Ville:</label>
-                                                        <input type="text" class="form-control" id="ville" placeholder="Ville:" value="Rabat">
-                                                    </div>
-                                                </div>
-                                                <!-- col -->
-
-                                                <div class="col-md-6">
-                                                    <div class="mb-3">
-                                                        <label for="tele" class="form-label">Téléphone:</label>
-                                                        <input type="number" class="form-control" id="tele" placeholder="Téléphone:" value="0680654338">
-                                                    </div>
-                                                </div>
-                                                <!-- col -->
-
-                                                <div class="col-md-12">
-                                                    <div class="mb-3">
-                                                        <label for="adresse" class="form-label">Adresse:</label>
-                                                        <textarea type="number" class="form-control" id="tele" placeholder="Adresse:">
-                                                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Vitae ducimus nostrum.
+                                                    <div class="col-md-12">
+                                                        <div class="mb-3">
+                                                            <label for="adresse" class="form-label">Adresse:</label>
+                                                            <textarea type="number" class="form-control" id="tele" placeholder="Adresse:">
+                                                        <?= $s['adresse'] ?>
                                                         </textarea>
+                                                            <input type="hidden" value="<?= $c['id'] ?>">
+                                                        </div>
                                                     </div>
+                                                    <!-- col -->
                                                 </div>
-                                                <!-- col -->
+                                                <!-- row -->
                                             </div>
-                                            <!-- row -->
-                                        </div>
-                                        <!-- modal-body -->
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                                            <button type="submit" class="btn btn-success">
-                                                Modifier
-                                            </button>
-                                        </div>
-                                        <!-- modal-footer -->
+                                            <!-- modal-body -->
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                                <button type="submit" class="btn btn-success">
+                                                    Modifier
+                                                </button>
+                                            </div>
+                                            <!-- modal-footer -->
 
-                                    </form>
+                                        </form>
 
-                                </div>
-                                <!-- modal-content -->
-                            </div>
-                            <!-- modal-dialog -->
-                        </div>
-                        <!-- modal -->
-
-                        <button type="button" class="btn btn-link btn-sm" data-bs-toggle="modal" data-bs-target="#delete_client_3">
-                            Supprimer
-                        </button>
-
-                        <div class="modal fade" id="delete_client_3" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog modal-lg">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h1 class="modal-title fs-5">
-                                            Supprimer
-                                        </h1>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
-                                    <form method="post">
-                                        <div class="modal-body">
-
-                                            <h5 class="text-danger fw-bold">
-                                                Voulez vous vraiment supprimer cette ligne ?
-                                            </h5>
-
-                                        </div>
-                                        <!-- modal-body -->
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                                            <button type="submit" class="btn btn-danger">
-                                                Supprimer
-                                            </button>
-                                        </div>
-                                        <!-- modal-footer -->
-
-                                    </form>
-
+                                    <!-- modal-content -->
                                 </div>
-                                <!-- modal-content -->
+                                <!-- modal-dialog -->
                             </div>
-                            <!-- modal-dialog -->
-                        </div>
-                        <!-- modal -->
-                    </td>
-                </tr>
+                            <!-- modal -->
+
+                            <button type="button" class="btn btn-link btn-sm" data-bs-toggle="modal" data-bs-target="#delete_client_<?= $c['id'] ?>">
+                                Supprimer
+                            </button>
+
+                            <div class="modal fade" id="delete_client_1" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h1 class="modal-title fs-5">
+                                                Supprimer
+                                            </h1>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <form method="post">
+                                            <div class="modal-body">
+
+                                                <h5 class="text-danger fw-bold">
+                                                    Voulez vous vraiment supprimer cette ligne ?
+                                                </h5>
+
+                                            </div>
+                                            <!-- modal-body -->
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                                <button type="submit" class="btn btn-danger">
+                                                    Supprimer
+                                                </button>
+                                            </div>
+                                            <!-- modal-footer -->
+
+                                        </form>
+
+                                    </div>
+                                    <!-- modal-content -->
+                                </div>
+                                <!-- modal-dialog -->
+                            </div>
+                            <!-- modal -->
+                        </td>
+                    </tr>
+                <?php endforeach ?>
+
+
 
             </tbody>
         </table>
