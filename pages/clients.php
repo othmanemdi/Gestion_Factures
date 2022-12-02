@@ -6,31 +6,29 @@ $title = "Clients";
 
 if (isset($_POST['ajouter_client'])) {
 
-    $nom = $_POST['nom'];
-    $numero = (int)$_POST['numero'];
-    $email = $_POST['email'];
-    $ville = $_POST['ville'];
-    $tele = (int)$_POST['tele'];
-    $adresse = $_POST['adresse'];
+    $nom = e($_POST['nom']);
+    $num = (int)$_POST['num'];
+    $email = e($_POST['email']);
+    $ville = e($_POST['ville']);
+    $telephone = e($_POST['telephone']);
+    $adresse = e($_POST['adresse']);
 
-    $client = $db->prepare("INSERT INTO clients SET 
+    $client = $pdo->prepare("INSERT INTO clients SET 
             nom = :nom,
-            numero = :numero,
+            num = :num,
             email = :email,
             ville = :ville,
-            tele = :tele,
+            telephone = :telephone,
             adresse = :adresse
-
-
         ");
 
     $client->execute(
         [
             'nom' => $nom,
-            'numero' => $numero,
+            'num' => $num,
             'email' => $email,
             'ville' => $ville,
-            'tele' => $tele,
+            'telephone' => $telephone,
             'adresse' => $adresse
         ]
     );
@@ -44,26 +42,24 @@ if (isset($_POST['ajouter_client'])) {
     exit();
 }
 
-
 if (isset($_POST['modifier_client'])) {
 
-    $nom = $_POST['nom'];
-    $numero = (int)$_POST['numero'];
-    $email = $_POST['email'];
-    $ville = $_POST['ville'];
-    $tele = (int)$_POST['tele'];
-    $adresse = $_POST['adresse'];
-    $client_id = (int) $_POST['client_id'];
+    $nom = e($_POST['nom']);
+    $num = (int)$_POST['num'];
+    $email = e($_POST['email']);
+    $ville = e($_POST['ville']);
+    $telephone = e($_POST['telephone']);
+    $adresse = e($_POST['adresse']);
+    $client_id = (int)$_POST['client_id'];
 
-    $client = $db->query("UPDATE clients SET 
-
+    $client = $pdo->query("UPDATE clients SET 
     nom = '$nom', 
-    numero = $numero, 
+    num = $num, 
     email = '$email', 
     ville = '$ville', 
-    tele = $tele,
-    adresse = '$adresse'
-
+    telephone = '$telephone',
+    adresse = '$adresse',
+    updated_at = NOW() 
     WHERE id = $client_id");
 
     if ($client) {
@@ -76,13 +72,11 @@ if (isset($_POST['modifier_client'])) {
     exit();
 }
 
-
-
 if (isset($_POST['supprimer_client'])) {
 
     $client_id = (int) $_POST['client_id'];
 
-    $client = $db->query("UPDATE clients SET deleted_at = NOW() WHERE id = $client_id");
+    $client = $pdo->query("UPDATE clients SET deleted_at = NOW() WHERE id = $client_id");
 
     if ($client) {
         $_SESSION['flash']['info'] = 'Bien supprimer';
@@ -94,12 +88,9 @@ if (isset($_POST['supprimer_client'])) {
     exit();
 }
 
-// $req = "SELECT * FROM clients WHERE  deleted_c IS NULL";
+$req = "SELECT * FROM clients WHERE deleted_at IS NULL ORDER BY id DESC";
 
-// $clients = $db->query($req)->fetchAll();
-
-
-
+$clients = $pdo->query($req)->fetchAll();
 
 $content_php = ob_get_clean();
 
@@ -145,7 +136,7 @@ ob_start(); ?>
                                 <div class="col-md-4">
                                     <div class="mb-3">
                                         <label for="nom" class="form-label">Nom:</label>
-                                        <input type="text" class="form-control" id="nom" placeholder="Nom:">
+                                        <input type="text" name="nom" class="form-control" id="nom" placeholder="Nom:">
                                     </div>
                                 </div>
                                 <!-- col -->
@@ -153,7 +144,7 @@ ob_start(); ?>
                                 <div class="col-md-4">
                                     <div class="mb-3">
                                         <label for="num" class="form-label">Numéro:</label>
-                                        <input type="number" class="form-control" id="num" placeholder="Numéro:">
+                                        <input type="number" name="num" class="form-control" id="num" placeholder="Numéro:">
                                     </div>
                                 </div>
                                 <!-- col -->
@@ -161,7 +152,7 @@ ob_start(); ?>
                                 <div class="col-md-4">
                                     <div class="mb-3">
                                         <label for="email" class="form-label">Email:</label>
-                                        <input type="email" class="form-control" id="email" placeholder="Email:">
+                                        <input type="email" name="email" class="form-control" id="email" placeholder="Email:">
                                     </div>
                                 </div>
                                 <!-- col -->
@@ -169,15 +160,15 @@ ob_start(); ?>
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="ville" class="form-label">Ville:</label>
-                                        <input type="text" class="form-control" id="ville" placeholder="Ville:">
+                                        <input type="text" name="ville" class="form-control" id="ville" placeholder="Ville:">
                                     </div>
                                 </div>
                                 <!-- col -->
 
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="tele" class="form-label">Téléphone:</label>
-                                        <input type="number" class="form-control" id="tele" placeholder="Téléphone:">
+                                        <label for="telephone" class="form-label">Téléphone:</label>
+                                        <input type="number" name="telephone" class="form-control" id="telephone" placeholder="Téléphone:">
                                     </div>
                                 </div>
                                 <!-- col -->
@@ -185,7 +176,7 @@ ob_start(); ?>
                                 <div class="col-md-12">
                                     <div class="mb-3">
                                         <label for="adresse" class="form-label">Adresse:</label>
-                                        <textarea type="number" class="form-control" id="adrss" placeholder="Adresse:"></textarea>
+                                        <textarea type="number" name="adresse" class="form-control" id="adrss" placeholder="Adresse:"></textarea>
                                     </div>
                                 </div>
                                 <!-- col -->
@@ -195,7 +186,7 @@ ob_start(); ?>
                         <!-- modal-body -->
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" name="ajouter_client" class="btn btn-primary">
                                 Ajouter
                             </button>
                         </div>
@@ -208,7 +199,6 @@ ob_start(); ?>
             </div>
             <!-- modal-dialog -->
         </div>
-        <!-- modal -->
 
         <table class="table table-sm table-bordered">
             <thead>
@@ -216,10 +206,6 @@ ob_start(); ?>
                     <th>Id</th>
                     <th>Num</th>
                     <th>Nom</th>
-                    <!-- <th>Téléphone</th>
-            <th>Email</th>
-            <th>Ville</th>
-            <th>Adresse</th> -->
                     <th>Action</th>
                 </tr>
             </thead>
@@ -230,10 +216,10 @@ ob_start(); ?>
                             <?= $c['id'] ?>
                         </td>
                         <td>
-                            <?= $c['numero'] ?>
+                            C:<?= add_zero($c['num']); ?>
                         </td>
                         <td>
-                            <?= $c['nom'] ?>
+                            <?= ucwords($c['nom']) ?>
                         </td>
                         <td>
 
@@ -241,7 +227,7 @@ ob_start(); ?>
                                 Afficher
                             </button>
 
-                            <div class="modal fade" id="show_client_1" tabindex="-1" aria-hidden="true">
+                            <div class="modal fade" id="show_client_<?= $c['id'] ?>" tabindex="-1" aria-hidden="true">
                                 <div class="modal-dialog modal-lg">
                                     <div class="modal-content">
                                         <div class="modal-header">
@@ -254,22 +240,26 @@ ob_start(); ?>
                                         <div class="modal-body">
                                             <dl class="row">
                                                 <dt class="col-sm-3">Nom:</dt>
-                                                <dd class="col-sm-9"><?= $s['nom'] ?></dd>
+                                                <dd class="col-sm-9">
+                                                    <?= ucwords($c['nom']) ?>
+                                                </dd>
 
                                                 <dt class="col-sm-3">Numéro:</dt>
-                                                <dd class="col-sm-9"><?= $s['numero'] ?></dd>
+                                                <dd class="col-sm-9">
+                                                    C:<?= add_zero($c['num']); ?>
+                                                </dd>
 
                                                 <dt class="col-sm-3">Email:</dt>
-                                                <dd class="col-sm-9"><?= $s['email'] ?></dd>
+                                                <dd class="col-sm-9"><?= $c['email'] ?></dd>
 
                                                 <dt class="col-sm-3">Téléphone:</dt>
-                                                <dd class="col-sm-9"><?= $s['tele'] ?></dd>
+                                                <dd class="col-sm-9"><?= $c['telephone'] ?></dd>
 
                                                 <dt class="col-sm-3">Ville:</dt>
-                                                <dd class="col-sm-9"><?= $s['ville'] ?></dd>
+                                                <dd class="col-sm-9"><?= ucwords($c['ville']) ?></dd>
 
                                                 <dt class="col-sm-3">Adresse:</dt>
-                                                <dd class="col-sm-9"><?= $s['adresse'] ?></dd>
+                                                <dd class="col-sm-9"><?= ucwords($c['adresse']) ?></dd>
                                             </dl>
 
                                         </div>
@@ -286,13 +276,12 @@ ob_start(); ?>
                                 </div>
                                 <!-- modal-dialog -->
                             </div>
-                            <!-- modal -->
 
                             <button type="button" class="btn btn-link btn-sm" data-bs-toggle="modal" data-bs-target="#update_client_<?= $c['id'] ?>">
                                 Modifier
                             </button>
 
-                            <div class="modal fade" id="update_client_1" tabindex="-1" aria-hidden="true">
+                            <div class="modal fade" id="update_client_<?= $c['id'] ?>" tabindex="-1" aria-hidden="true">
                                 <div class="modal-dialog modal-lg">
                                     <div class="modal-content">
                                         <div class="modal-header">
@@ -308,7 +297,7 @@ ob_start(); ?>
                                                     <div class="col-md-4">
                                                         <div class="mb-3">
                                                             <label for="nom" class="form-label">Nom:</label>
-                                                            <input type="text" class="form-control" id="nom" placeholder="Nom:" value="<?= $c['nom'] ?>">
+                                                            <input type="text" class="form-control" id="nom" name="nom" placeholder="Nom:" value="<?= $c['nom'] ?>">
                                                         </div>
                                                     </div>
                                                     <!-- col -->
@@ -316,7 +305,7 @@ ob_start(); ?>
                                                     <div class="col-md-4">
                                                         <div class="mb-3">
                                                             <label for="num" class="form-label">Numéro:</label>
-                                                            <input type="number" class="form-control" id="num" placeholder="Numéro:" value="<?= $c['numero'] ?>">
+                                                            <input type="number" class="form-control" id="num" name="num" placeholder="Numéro:" value="<?= $c['num'] ?>">
                                                         </div>
                                                     </div>
                                                     <!-- col -->
@@ -324,7 +313,7 @@ ob_start(); ?>
                                                     <div class="col-md-4">
                                                         <div class="mb-3">
                                                             <label for="email" class="form-label">Email:</label>
-                                                            <input type="email" class="form-control" id="email" placeholder="Email:" value="<?= $c['email'] ?>">
+                                                            <input type="email" class="form-control" id="email" name="email" placeholder="Email:" value="<?= $c['email'] ?>">
                                                         </div>
                                                     </div>
                                                     <!-- col -->
@@ -332,15 +321,15 @@ ob_start(); ?>
                                                     <div class="col-md-6">
                                                         <div class="mb-3">
                                                             <label for="ville" class="form-label">Ville:</label>
-                                                            <input type="text" class="form-control" id="ville" placeholder="Ville:" value="<?= $c['ville'] ?>">
+                                                            <input type="text" class="form-control" id="ville" name="ville" placeholder="Ville:" value="<?= $c['ville'] ?>">
                                                         </div>
                                                     </div>
                                                     <!-- col -->
 
                                                     <div class="col-md-6">
                                                         <div class="mb-3">
-                                                            <label for="tele" class="form-label">Téléphone:</label>
-                                                            <input type="number" class="form-control" id="tele" placeholder="Téléphone:" value="<?= $c['tele'] ?>">
+                                                            <label for="telephone" class="form-label">Téléphone:</label>
+                                                            <input type="number" class="form-control" id="telephone" name="telephone" placeholder="Téléphone:" value="<?= $c['telephone'] ?>">
                                                         </div>
                                                     </div>
                                                     <!-- col -->
@@ -348,10 +337,9 @@ ob_start(); ?>
                                                     <div class="col-md-12">
                                                         <div class="mb-3">
                                                             <label for="adresse" class="form-label">Adresse:</label>
-                                                            <textarea type="number" class="form-control" id="tele" placeholder="Adresse:">
-                                                        <?= $s['adresse'] ?>
-                                                        </textarea>
-                                                            <input type="hidden" value="<?= $c['id'] ?>">
+                                                            <textarea type="number" class="form-control" id="adresse" name="adresse" placeholder="Adresse:"><?= $c['adresse'] ?></textarea>
+
+                                                            <input type="hidden" name="client_id" value="<?= $c['id'] ?>">
                                                         </div>
                                                     </div>
                                                     <!-- col -->
@@ -361,7 +349,7 @@ ob_start(); ?>
                                             <!-- modal-body -->
                                             <div class="modal-footer">
                                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                                                <button type="submit" class="btn btn-success">
+                                                <button type="submit" name="modifier_client" class="btn btn-success">
                                                     Modifier
                                                 </button>
                                             </div>
@@ -374,13 +362,12 @@ ob_start(); ?>
                                 </div>
                                 <!-- modal-dialog -->
                             </div>
-                            <!-- modal -->
 
                             <button type="button" class="btn btn-link btn-sm" data-bs-toggle="modal" data-bs-target="#delete_client_<?= $c['id'] ?>">
                                 Supprimer
                             </button>
 
-                            <div class="modal fade" id="delete_client_1" tabindex="-1" aria-hidden="true">
+                            <div class="modal fade" id="delete_client_<?= $c['id'] ?>" tabindex="-1" aria-hidden="true">
                                 <div class="modal-dialog modal-lg">
                                     <div class="modal-content">
                                         <div class="modal-header">
@@ -390,6 +377,7 @@ ob_start(); ?>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <form method="post">
+
                                             <div class="modal-body">
 
                                                 <h5 class="text-danger fw-bold">
@@ -400,7 +388,8 @@ ob_start(); ?>
                                             <!-- modal-body -->
                                             <div class="modal-footer">
                                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                                                <button type="submit" class="btn btn-danger">
+                                                <input type="hidden" name="client_id" value="<?= $c['id'] ?>">
+                                                <button type="submit" name="supprimer_client" class="btn btn-danger">
                                                     Supprimer
                                                 </button>
                                             </div>
@@ -413,12 +402,9 @@ ob_start(); ?>
                                 </div>
                                 <!-- modal-dialog -->
                             </div>
-                            <!-- modal -->
                         </td>
                     </tr>
                 <?php endforeach ?>
-
-
 
             </tbody>
         </table>

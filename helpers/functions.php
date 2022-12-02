@@ -44,3 +44,8 @@ function e($value)
 {
     return trim(htmlentities($value));
 }
+
+function add_zero($value)
+{
+    return str_pad($value, 2, '0', STR_PAD_LEFT);
+}
