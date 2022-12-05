@@ -108,9 +108,9 @@ ob_start(); ?>
                                         <label for="categorie_id" class="form-label">Catégorie:</label>
 
                                         <select name="categorie_id" id="categorie_id" class="form-select" aria-label="Default select example">
-                                            <?php foreach ($categories as $key => $m) : ?>
+                                            <?php foreach ($categories as $key => $p) : ?>
 
-                                                <option value="<?= $m['id'] ?>"><?= $m['nom'] ?></option>
+                                                <option value="<?= $p['id'] ?>"><?= $p['nom'] ?></option>
                                             <?php endforeach ?>
                                         </select>
                                     </div>
@@ -125,8 +125,8 @@ ob_start(); ?>
                                         <label for="couleur_id" class="form-label">Couleur:</label>
 
                                         <select name="couleur_id" id="couleur_id" class="form-select" aria-label="Default select example">
-                                            <?php foreach ($couleurs as $key => $m) : ?>
-                                                <option value="<?= $m['id'] ?>"><?= $m['nom'] ?></option>
+                                            <?php foreach ($couleurs as $key => $p) : ?>
+                                                <option value="<?= $p['id'] ?>"><?= $p['nom'] ?></option>
                                             <?php endforeach ?>
                                         </select>
                                     </div>
@@ -173,15 +173,15 @@ ob_start(); ?>
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($produits as $key => $m) : ?>
+                <?php foreach ($produits as $key => $p) : ?>
                     <tr>
-                        <td><?= $m['id'] ?></td>
+                        <td><?= $p['id'] ?></td>
                         <td>
-                            <img src="images/produits/<?= $m['image'] ?>" width="30" alt="">
+                            <img src="images/produits/<?= $p['image'] ?>" width="30" alt="">
                         </td>
-                        <td><?= $m['reference'] ?></td>
-                        <td><?= $m['designation'] ?></td>
-                        <td><?=_number_format($m['prix']) ?> DH</td>
+                        <td><?= $p['reference'] ?></td>
+                        <td><?= $p['designation'] ?></td>
+                        <td><?= _number_format($p['prix']) ?> DH</td>
                         <td>
                             <a href="commande_afficher" class="btn btn-primary btn-sm">Afficher</a>
                             <a href="" class="btn btn-dark btn-sm">Modifier</a>
