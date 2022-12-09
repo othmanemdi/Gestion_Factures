@@ -1,5 +1,5 @@
 <?php
-$database_name = 'gestion_stagiaires';
+$database_name = 'gestion_factures';
 $hote = 'localhost';
 $db_username = 'root';
 $db_password = '';
@@ -10,6 +10,7 @@ $nabila = new PDO("mysql:dbname=$database_name;host=$hote", $db_username, $db_pa
     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
 ]);
 
+// ALTER TABLE `clients` ADD `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `telephone`, ADD `update_at` DATETIME NULL DEFAULT NULL AFTER `created_at`, ADD `deleted_at` DATETIME NULL DEFAULT NULL AFTER `update_at`;
 
 
 
