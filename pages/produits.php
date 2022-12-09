@@ -36,9 +36,65 @@ if (isset($_POST['produit_add_btn'])) {
     exit();
 }
 
-$produits = $db->query("SELECT * FROM produits ORDER BY id DESC")->fetchAll();
-$categories = $db->query("SELECT id,nom FROM categories ORDER BY id DESC")->fetchAll();
-$couleurs = $db->query("SELECT id,nom FROM couleurs ORDER BY id DESC")->fetchAll();
+
+if (isset($_POST['produit_update_btn'])) {
+
+
+    $reference = ucfirst(strtolower($_POST['reference']));
+    $prix = $_POST['prix'];
+    $designation = ucfirst(strtolower($_POST['designation']));
+    $produit_id = (int) $_POST['produit_id'];
+
+
+    $produit = $db->prepare("UPDATE produits  SET 
+    designation = :designation,prix = :prix,reference = :reference,
+    updated_at = NOW() WHERE id = $produit_id
+");
+    $produit->execute(
+        [
+            'reference' => $reference,
+            'prix' => $prix,
+            'designation' => $designation
+
+        ]
+    );
+
+    $_SESSION['flash']['success'] = 'Bien modifie';
+    header('Location: produits');
+    die();
+}
+
+
+
+
+
+
+if (isset($_POST['produit_delete_btn'])) {
+    $produit_id = (int) $_POST['produit_id'];
+    $produit = $db->prepare("UPDATE produits SET deleted_at = NOW() WHERE id = :produit_id");
+
+    $produit->execute(
+        [
+            'produit_id' => $produit_id
+        ]
+    );
+
+    $_SESSION['flash']['success'] = "Bien supprimer";
+    header('Location: produits');
+    die();
+}
+
+$search = '';
+
+if (isset($_POST['rechercher_produit'])) {
+    $p = e($_POST['p']);
+    $search =  " AND designation LIKE '%" . $p . "%'";
+}
+
+
+$produits = $db->query("SELECT * FROM produits WHERE deleted_at IS NULL $search ORDER BY id DESC")->fetchAll();
+$categories = $db->query("SELECT id,nom FROM categories WHERE deleted_at IS NULL ORDER BY id DESC")->fetchAll();
+$couleurs = $db->query("SELECT id,nom FROM couleurs WHERE deleted_at IS NULL ORDER BY id DESC")->fetchAll();
 
 $content_php = ob_get_clean();
 
@@ -50,7 +106,15 @@ ob_start(); ?>
         <li class="breadcrumb-item active" aria-current="page">Liste produits</li>
     </ol>
 </nav>
+<div>
 
+    <form method="post" class="d-flex py-2   col-6 mx-auto">
+        <div class="input-group">
+            <input type="text" class="form-control me-2 rounded-pill" placeholder="Rechercher:" name="p" value="<?= isset($_POST['p']) ? e($_POST['p']) : '' ?>">
+            <button class="btn btn-outline-secondary visually-hidden" type="submit" name="rechercher_produit">Rechercher</button>
+        </div>
+    </form>
+</div>
 <h4 class="fw-bold mb-3">Liste produits</h4>
 
 <div class="card">
@@ -66,7 +130,13 @@ ob_start(); ?>
         <button type="button" class="btn btn-primary mb-3 fw-bold" data-bs-toggle="modal" data-bs-target="#add_produit">
             Ajouter un produits
         </button>
-
+        <?php if (isset($_POST['rechercher_produit']) and !empty($_POST['p'])) : ?>
+                <div id="search-message" class="text-danger fw-bold text-center">
+                    <h4>La liste des produits est filtré par le mot
+                        (<?= e($_POST['p']) ?>)
+                    </h4>
+                </div>
+            <?php endif ?>
         <div class="modal fade" id="add_produit" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
@@ -184,8 +254,91 @@ ob_start(); ?>
                         <td><?= _number_format($p['prix']) ?> DH</td>
                         <td>
                             <a href="commande_afficher" class="btn btn-primary btn-sm">Afficher</a>
-                            <a href="" class="btn btn-dark btn-sm">Modifier</a>
-                            <a href="" class="btn btn-danger btn-sm">Supprimer</a>
+
+                            <button type="button" class="btn btn-sm btn-dark" data-bs-toggle="modal" data-bs-target="#brand_update_<?= $p['id'] ?>">
+                                Modifier
+                            </button>
+
+                            <div class="modal fade" id="brand_update_<?= $p['id'] ?>" tabindex="-1" aria-labelledby="brand_update_<?= $p['id'] ?>Label" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <form method="post">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="brand_update_<?= $p['id'] ?>Label">
+                                                    Modifier la produit
+                                                </h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+
+                                                <div class="row">
+
+                                                    <div class="col-md-4">
+                                                        <div class="mb-3">
+                                                            <label for="designation" class="form-label">Désignation:</label>
+                                                            <input type="text" class="form-control" name="designation" id="designation" value="<?= $p['designation'] ?>" placeholder="Désignation:">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-4">
+                                                        <div class="mb-3">
+                                                            <label for="prix" class="form-label">Prix U:</label>
+                                                            <input type="number" class="form-control" id="prix" value="<?= $p['prix'] ?>" name="prix" placeholder="Prix U:">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="mb-3">
+                                                            <label for="reference" class="form-label">Référence:</label>
+                                                            <input type="text" class="form-control" name="reference" id="reference" value="<?= $p['reference'] ?>" placeholder="Référence:">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <input name="produit_id" type="hidden" value="<?= $p['id'] ?>">
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                                <button name="produit_update_btn" type="submit" class="btn btn-primary">
+                                                    Modifier
+                                                </button>
+
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#brand_delete_<?= $p['id'] ?>">
+                                Supprimer
+                            </button>
+
+                            <div class="modal fade" id="brand_delete_<?= $p['id'] ?>" tabindex="-1" aria-labelledby="brand_delete_<?= $p['id'] ?>Label" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <form method="post">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="brand_delete_<?= $p['id'] ?>Label">
+                                                    Supprimer la produit
+                                                </h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+
+                                                <h5 class="text-danger">Voulez vous vraiment supprimer <?= $p['id'] ?> ?</h5>
+                                                <input name="produit_id" type="hidden" value="<?= $p['id'] ?>">
+
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                                <button name="produit_delete_btn" type="submit" class="btn btn-danger">
+                                                    Supprimer
+                                                </button>
+
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
                         </td>
                     </tr>
 

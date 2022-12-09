@@ -236,7 +236,7 @@ ob_start(); ?>
 
         <table class="table table-sm table-bordered">
             <thead>
-                <tr class="table-light">
+                <tr class="table-dark <!-- light -->">
                     <th>Id</th>
                     <th>Num</th>
                     <th>Nom</th>
