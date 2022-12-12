@@ -131,12 +131,12 @@ ob_start(); ?>
             Ajouter un produits
         </button>
         <?php if (isset($_POST['rechercher_produit']) and !empty($_POST['p'])) : ?>
-                <div id="search-message" class="text-danger fw-bold text-center">
-                    <h4>La liste des produits est filtré par le mot
-                        (<?= e($_POST['p']) ?>)
-                    </h4>
-                </div>
-            <?php endif ?>
+            <div id="search-message" class="text-danger fw-bold text-center">
+                <h4>La liste des produits est filtré par le mot
+                    (<?= e($_POST['p']) ?>)
+                </h4>
+            </div>
+        <?php endif ?>
         <div class="modal fade" id="add_produit" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
@@ -253,8 +253,67 @@ ob_start(); ?>
                         <td><?= $p['designation'] ?></td>
                         <td><?= _number_format($p['prix']) ?> DH</td>
                         <td>
-                            <a href="commande_afficher" class="btn btn-primary btn-sm">Afficher</a>
+                            <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#brand_show_<?= $p['id'] ?>">
+                                Afficher
+                            </button>
 
+                            <div class="modal fade" id="brand_show_<?= $p['id'] ?>" tabindex="-1" aria-labelledby="brand_show_<?= $p['id'] ?>Label" aria-hidden="true">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="brand_show_<?= $p['id'] ?>Label">
+
+                                                Produit info
+
+                                            </h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+
+
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <img src="images/produits/<?= $p['image'] ?>"width="400" alt="">
+
+                                                </div>
+
+                                                <div class="col-md-6">
+                                                    <ul class="list-group">
+                                                        <li class="list-group-item">
+                                                            <b>Id:</b> <?= $p['id'] ?>
+                                                        </li>
+
+                                                        <li class="list-group-item">
+                                                            <b>Référence:</b> <?= ucfirst($p['reference']) ?>
+                                                        </li>
+
+
+                                                        <li class="list-group-item">
+                                                            <b>Prix:</b>
+                                                            <span class="fw-bold">
+                                                                <?= $p['prix'] ?> DH
+                                                            </span>
+
+                                                        </li>
+                                                        <li class="list-group-item">
+                                                            <b>Désignation:</b>
+                                                            <p>
+                                                                <?= $p['designation'] ?>
+                                                            </p>
+                                                        </li>
+
+                                                    </ul>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <button type="button" class="btn btn-sm btn-dark" data-bs-toggle="modal" data-bs-target="#brand_update_<?= $p['id'] ?>">
                                 Modifier
                             </button>
