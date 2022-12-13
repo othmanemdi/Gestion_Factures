@@ -39,8 +39,28 @@ function destroy_cookie($key): void
     setcookie($key, "", -1);
 }
 
-
-function e($value)
+function e($value): string
 {
     return trim(htmlentities($value));
+}
+
+function add_zero($value)
+{
+    return str_pad($value, 2, '0', STR_PAD_LEFT);
+}
+
+// number_format($produit->prix, 2, ',', ' ')
+function _number_format(float $num = 0): string
+{
+    return number_format($num, 2, ',', ' ');
+}
+
+function set_price($value): int
+{
+    return $value * 100;
+}
+
+function get_price($value): float
+{
+    return $value / 100;
 }

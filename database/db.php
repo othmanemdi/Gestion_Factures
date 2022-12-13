@@ -4,7 +4,7 @@ $hote = 'localhost';
 $db_username = 'root';
 $db_password = '';
 
-$nabila = new PDO("mysql:dbname=$database_name;host=$hote", $db_username, $db_password, [
+$pdo = new PDO("mysql:dbname=$database_name;host=$hote", $db_username, $db_password, [
     PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8",
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC, //  FETCH_OBJ or FETCH_ASSOC or FETCH_CLASS
     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION

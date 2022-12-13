@@ -3,6 +3,118 @@
 ob_start();
 // php
 $title = "Produits";
+// $uploadOk = true;
+$errors = [];
+
+if (isset($_POST['add_product'])) {
+
+    $image_name = $_FILES["image"]["name"];
+    $image_type = $_FILES["image"]["type"];
+    $image_tmp_name = $_FILES["image"]["tmp_name"];
+    $image_error = $_FILES["image"]["error"];
+    $image_size = $_FILES["image"]["size"];
+
+    $target_dir = "images/produits/";
+    $target_file = $target_dir . basename($image_name);
+
+    $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+
+    $extention_autoriser = ['jpg', 'jpeg', 'png'];
+
+    if (!in_array($imageFileType, $extention_autoriser)) {
+
+        $errors[] = "Ce fichier n'est pas autorisé ";
+        // echo "Ce fichier n'est pas autorisé ";
+        $errors[] = "Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
+
+        // echo "Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
+        // $uploadOk = false;
+    }
+
+    // Check if file already exists
+    if (file_exists($target_file)) {
+        // echo " Sorry, file already exists.";
+        $errors[] = "Sorry, file already exists.";
+
+        // $uploadOk = false;
+    }
+
+    // Check file size
+    if ($image_size > 500000) {
+        $errors[] = "Sorry, your file is too large.";
+
+        // echo "Sorry, your file is too large.";
+        // $uploadOk = false;
+    }
+
+    // if ($uploadOk == true) {
+    //     move_uploaded_file($image_tmp_name, $target_file);
+    //     echo "The file " . htmlspecialchars(basename($image_name)) . " has been uploaded.";
+    // } else {
+    //     echo "Sorry, there was an error uploading your file.";
+    // }
+
+    // $text = 'Hind';
+
+    // $text .= ' OHC';
+    // $text = ' ZZZ';
+
+    // echo $text;
+    // exit();
+    if (empty($errors)) {
+        move_uploaded_file($image_tmp_name, $target_file);
+        $_SESSION['flash']['info'] = 'Bien ajouter';
+    } else {
+        $error_message = '';
+        foreach ($errors as $key => $e) {
+            $error_message  .= $e;
+            $error_message  .= "<br>";
+        }
+        $_SESSION['flash']['danger'] = $error_message;
+    }
+
+
+
+
+
+    $reference = e($_POST['reference']);
+    $designation = e($_POST['designation']);
+    $prix = set_price($_POST['prix_u']);
+    $categorie_id = (int)$_POST['categorie_id'];
+    $couleur_id = (int)$_POST['couleur_id'];
+
+    $produit = $pdo->prepare("INSERT INTO produits SET image = :image, reference = :reference, designation = :designation,prix = :prix,categorie_id = :categorie_id, couleur_id = :couleur_id ");
+
+    $produit->execute(
+        [
+            'image' => $image_name, 'reference' => $reference, 'designation' => $designation, 'prix' => $prix, 'categorie_id' => $categorie_id, 'couleur_id' => $couleur_id
+        ]
+    );
+
+    if ($produit) {
+        $_SESSION['flash']['info'] = 'Bien ajouter';
+    } else {
+        $_SESSION['flash']['danger'] = 'Error !!!';
+    }
+
+    header('Location: produits');
+    exit();
+}
+
+// $produits = $pdo->query("SELECT
+// p.*,
+// c.nom As categorie_nom,
+// cl.nom As couleur_nom
+// FROM produits p
+// INNER JOIN categories c ON c.id = p.categorie_id
+// INNER JOIN couleurs cl ON cl.id = p.couleur_id
+// WHERE p.deleted_at IS NULL
+// ORDER BY p.id;")->fetchAll();
+
+$categories = $pdo->query("SELECT * FROM categories WHERE deleted_at IS NULL")->fetchAll();
+$couleurs = $pdo->query("SELECT * FROM couleurs WHERE deleted_at IS NULL")->fetchAll();
+$produits = $pdo->query("SELECT * FROM produits_view")->fetchAll();
+
 
 $content_php = ob_get_clean();
 
@@ -40,14 +152,14 @@ ob_start(); ?>
                         </h1>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <form method="post">
+                    <form method="post" enctype="multipart/form-data">
                         <div class="modal-body">
 
                             <div class="row">
                                 <div class="col-md-4">
                                     <div class="mb-3">
                                         <label for="reference" class="form-label">Référence:</label>
-                                        <input type="text" class="form-control" id="reference" placeholder="Référence:">
+                                        <input type="text" class="form-control" id="reference" name="reference" placeholder="Référence:">
                                     </div>
                                 </div>
                                 <!-- col -->
@@ -55,7 +167,7 @@ ob_start(); ?>
                                 <div class="col-md-4">
                                     <div class="mb-3">
                                         <label for="designation" class="form-label">Désignation:</label>
-                                        <input type="text" class="form-control" id="designation" placeholder="Désignation:">
+                                        <input type="text" class="form-control" id="designation" name="designation" placeholder="Désignation:">
                                     </div>
                                 </div>
                                 <!-- col -->
@@ -68,10 +180,47 @@ ob_start(); ?>
                                 </div>
                                 <!-- col -->
 
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="categorie_id" class="form-label">
+                                            Catégories:
+                                        </label>
+
+                                        <select name="categorie_id" class="form-select">
+                                            <?php foreach ($categories as $key => $c) : ?>
+                                                <option value="<?= $c['id'] ?>">
+                                                    <?= ucwords($c['nom']) ?>
+                                                </option>
+                                            <?php endforeach ?>
+                                        </select>
+                                    </div>
+                                </div>
+                                <!-- col -->
+
+
+
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="couleur_id" class="form-label">
+                                            Couleurs:
+                                        </label>
+
+                                        <select name="couleur_id" class="form-select">
+                                            <?php foreach ($couleurs as $key => $c) : ?>
+                                                <option value="<?= $c['id'] ?>">
+                                                    <?= ucwords($c['nom']) ?>
+                                                </option>
+                                            <?php endforeach ?>
+                                        </select>
+
+                                    </div>
+                                </div>
+                                <!-- col -->
+
                                 <div class="col-md-12">
                                     <div class="mb-3">
                                         <label for="Photo" class="form-label">Photo:</label>
-                                        <input type="file" class="form-control">
+                                        <input type="file" name="image" class="form-control">
                                     </div>
                                 </div>
                                 <!-- col -->
@@ -81,7 +230,7 @@ ob_start(); ?>
                         <!-- modal-body -->
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" name="add_product" class="btn btn-primary">
                                 Ajouter
                             </button>
                         </div>
@@ -102,55 +251,30 @@ ob_start(); ?>
                     <th>Photo</th>
                     <th>Référence</th>
                     <th>Désignation</th>
+                    <th>Catégorie</th>
                     <th>Prix U</th>
                     <th>Action</th>
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>
-                        <img src="images/produits/1.jpg" width="30" alt="">
-                    </td>
-                    <td>R-01</td>
-                    <td>Iphone Pro Max Blue 255 SSD</td>
-                    <td>13 000,00 DH</td>
-                    <td>
-                        <a href="commande_afficher" class="btn btn-link btn-sm">Afficher</a>
-                        <a href="" class="btn btn-link btn-sm">Modifier</a>
-                        <a href="" class="btn btn-link btn-sm">Supprimer</a>
-                    </td>
-                </tr>
+                <?php foreach ($produits as $key => $p) : ?>
+                    <tr>
+                        <td><?= $p['id'] ?></td>
+                        <td>
+                            <img src="images/produits/<?= $p['image'] ?>" width="30" alt="">
+                        </td>
+                        <td><?= ucwords($p['reference'], '-') ?></td>
+                        <td><?= ucwords($p['designation']) ?> - <?= ucwords($p['couleur_nom']) ?></td>
+                        <td><?= ucwords($p['categorie_nom']) ?></td>
+                        <td><?= $p['prix_decimale'] ?> DH</td>
+                        <td>
+                            <a href="" class="btn btn-link btn-sm">Afficher</a>
+                            <a href="" class="btn btn-link btn-sm">Modifier</a>
+                            <a href="" class="btn btn-link btn-sm">Supprimer</a>
+                        </td>
+                    </tr>
+                <?php endforeach ?>
 
-                <tr>
-                    <td>2</td>
-                    <td>
-                        <img src="images/produits/2.jpg" width="30" alt="">
-                    </td>
-                    <td>R-02</td>
-                    <td>Iphone Pro Max Gold 255 SSD</td>
-                    <td>13 000,00 DH</td>
-                    <td>
-                        <a href="commande_afficher" class="btn btn-link btn-sm">Afficher</a>
-                        <a href="" class="btn btn-link btn-sm">Modifier</a>
-                        <a href="" class="btn btn-link btn-sm">Supprimer</a>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>3</td>
-                    <td>
-                        <img src="images/produits/3.jpg" width="30" alt="">
-                    </td>
-                    <td>R-03</td>
-                    <td>Imac Orange 255 SSD</td>
-                    <td>24 000,00 DH</td>
-                    <td>
-                        <a href="commande_afficher" class="btn btn-link btn-sm">Afficher</a>
-                        <a href="" class="btn btn-link btn-sm">Modifier</a>
-                        <a href="" class="btn btn-link btn-sm">Supprimer</a>
-                    </td>
-                </tr>
 
             </tbody>
         </table>
