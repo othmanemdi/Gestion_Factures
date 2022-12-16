@@ -44,10 +44,11 @@ function e($value): string
     return trim(htmlentities($value));
 }
 
-function add_zero($value)
+function add_zero($value, $num = 2)
 {
-    return str_pad($value, 2, '0', STR_PAD_LEFT);
+    return str_pad($value, $num, '0', STR_PAD_LEFT);
 }
+
 
 // number_format($produit->prix, 2, ',', ' ')
 function _number_format(float $num = 0): string

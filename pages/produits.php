@@ -21,6 +21,7 @@ if (isset($_POST['add_product'])) {
 
     $extention_autoriser = ['jpg', 'jpeg', 'png'];
 
+
     if (!in_array($imageFileType, $extention_autoriser)) {
 
         $errors[] = "Ce fichier n'est pas autorisé ";
