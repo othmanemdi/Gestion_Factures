@@ -61,7 +61,14 @@ function set_price($value): int
     return $value * 100;
 }
 
-function get_price($value): float
+function get_price($value, $qt = 1): float
 {
-    return $value / 100;
+    return $value / 100 * $qt;
+}
+
+if (!function_exists('_date_format_year')) {
+    function _date_format_year($date)
+    {
+        return date("Y", strtotime($date));
+    }
 }

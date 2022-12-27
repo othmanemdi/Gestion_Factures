@@ -1,6 +1,6 @@
-ALTER TABLE categories
+ALTER TABLE commande_produit
 ADD
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER nom,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 ADD
     updated_at DATETIME NULL DEFAULT NULL AFTER created_at,
 ADD
@@ -61,7 +61,7 @@ CREATE OR REPLACE VIEW COMMANDES_VIEW AS
 	SELECT
 	    c.*,
 	    CONCAT('BC-', LPAD(c.num, 4, 0)) AS commande_num,
-	    DATE_FORMAT(c.date_commande, "%d %m %Y") AS date_commande_format,
+	    DATE_FORMAT(c.date_commande, "%d/%m/%Y") AS date_commande_format,
 	    cl.num AS client_num,
 	    LOWER(cl.nom) AS client_nom,
 	    LOWER(cl.email) AS client_email,
@@ -76,3 +76,29 @@ CREATE OR REPLACE VIEW COMMANDES_VIEW AS
 NULL; 
 
 SELECT * FROM commandes_view;
+
+update produits set image = '1.jpg' where id = 1;
+
+SELECT
+    pv.*,
+    cp.quantite, (pv.prix / 100) * cp.quantite AS prix_total
+FROM commande_produit cp
+    LEFT JOIN produits_view pv ON pv.id = cp.id;
+
+CREATE OR REPLACE VIEW COMMANDE_PRODUITS_VIEW AS 
+	SELECT
+	    cp.id,
+	    pv.id As produit_id,
+	    pv.image,
+	    pv.reference,
+	    pv.designation,
+	    pv.prix,
+	    pv.prix_decimale,
+	    pv.categorie_nom,
+	    pv.couleur_nom,
+	    cp.quantite,
+	    FORMAT( (pv.prix / 100) * cp.quantite, 2) AS prix_total,
+	    cp.commande_id
+	FROM commande_produit cp
+	    LEFT JOIN produits_view pv ON pv.id = cp.p
+PRODUIT_ID; 

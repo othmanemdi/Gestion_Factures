@@ -6,6 +6,16 @@ $title = "Produits";
 // $uploadOk = true;
 $errors = [];
 
+
+// if (file_exists($filename)) {
+//     unlink($filename);
+//     echo 'File ' . $filename . ' has been deleted';
+// } else {
+//     echo 'Could not delete ' . $filename . ', file does not exist';
+// }
+
+
+
 if (isset($_POST['add_product'])) {
 
     $image_name = $_FILES["image"]["name"];
@@ -101,6 +111,111 @@ if (isset($_POST['add_product'])) {
     header('Location: produits');
     exit();
 }
+
+
+
+if (isset($_POST['update_product'])) {
+
+    $produit_id = e($_POST['produit_id']);
+    $image_name = e($_POST['image_name']);
+
+    $reference = e($_POST['reference']);
+    $designation = e($_POST['designation']);
+    $prix = set_price($_POST['prix_u']);
+    $categorie_id = (int)$_POST['categorie_id'];
+    $couleur_id = (int)$_POST['couleur_id'];
+
+    if ($_FILES['image']['name'] != '') {
+
+        unlink("images/produits/" . $image_name);
+
+
+        $image_name = $_FILES["image"]["name"];
+        $image_type = $_FILES["image"]["type"];
+        $image_tmp_name = $_FILES["image"]["tmp_name"];
+        $image_error = $_FILES["image"]["error"];
+        $image_size = $_FILES["image"]["size"];
+
+        $target_dir = "images/produits/";
+        $target_file = $target_dir . basename($image_name);
+
+        $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+
+        $extention_autoriser = ['jpg', 'jpeg', 'png'];
+
+
+        if (!in_array($imageFileType, $extention_autoriser)) {
+
+            $errors[] = "Ce fichier n'est pas autorisé ";
+            // echo "Ce fichier n'est pas autorisé ";
+            $errors[] = "Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
+
+            // echo "Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
+            // $uploadOk = false;
+        }
+
+        // Check if file already exists
+        if (file_exists($target_file)) {
+            // echo " Sorry, file already exists.";
+            $errors[] = "Sorry, file already exists.";
+
+            // $uploadOk = false;
+        }
+
+        // Check file size
+        if ($image_size > 500000) {
+            $errors[] = "Sorry, your file is too large.";
+
+            // echo "Sorry, your file is too large.";
+            // $uploadOk = false;
+        }
+
+        // if ($uploadOk == true) {
+        //     move_uploaded_file($image_tmp_name, $target_file);
+        //     echo "The file " . htmlspecialchars(basename($image_name)) . " has been uploaded.";
+        // } else {
+        //     echo "Sorry, there was an error uploading your file.";
+        // }
+
+        // $text = 'Hind';
+
+        // $text .= ' OHC';
+        // $text = ' ZZZ';
+
+        // echo $text;
+        // exit();
+        if (empty($errors)) {
+            move_uploaded_file($image_tmp_name, $target_file);
+            $_SESSION['flash']['info'] = 'Bien ajouter';
+        } else {
+            $error_message = '';
+            foreach ($errors as $key => $e) {
+                $error_message  .= $e;
+                $error_message  .= "<br>";
+            }
+            $_SESSION['flash']['danger'] = $error_message;
+        }
+    }
+
+    $produit = $pdo->prepare("UPDATE produits SET image = :image, reference = :reference, designation = :designation,prix = :prix,categorie_id = :categorie_id, couleur_id = :couleur_id, updated_at = NOW() WHERE id = :produit_id");
+
+    $produit->execute(
+        [
+            'image' => $image_name, 'reference' => $reference, 'designation' => $designation, 'prix' => $prix, 'categorie_id' => $categorie_id, 'couleur_id' => $couleur_id, 'produit_id' => $produit_id
+        ]
+    );
+
+    if ($produit) {
+        $_SESSION['flash']['info'] = 'Bien modifier';
+    } else {
+        $_SESSION['flash']['danger'] = 'Error !!!';
+    }
+
+    header('Location: produits');
+    exit();
+}
+
+
 
 // $produits = $pdo->query("SELECT
 // p.*,
@@ -269,8 +384,193 @@ ob_start(); ?>
                         <td><?= ucwords($p['categorie_nom']) ?></td>
                         <td><?= $p['prix_decimale'] ?> DH</td>
                         <td>
-                            <a href="" class="btn btn-link btn-sm">Afficher</a>
-                            <a href="" class="btn btn-link btn-sm">Modifier</a>
+
+                            <button type="button" class="btn btn-link btn-sm" data-bs-toggle="modal" data-bs-target="#brand_show_<?= $p['id'] ?>">
+                                Afficher
+                            </button>
+
+                            <div class="modal fade" id="brand_show_<?= $p['id'] ?>" tabindex="-1" aria-labelledby="brand_show_<?= $p['id'] ?>Label" aria-hidden="true">
+                                <div class="modal-dialog modal-xl">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="brand_show_<?= $p['id'] ?>Label">
+                                                Produit info
+                                            </h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+
+
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <img src="images/produits/<?= $p['image'] ?>" width="400" alt="">
+
+                                                </div>
+
+                                                <div class="col-md-6">
+                                                    <ul class="list-group">
+                                                        <li class="list-group-item">
+                                                            <b>Id:</b> <?= $p['id'] ?>
+                                                        </li>
+
+                                                        <li class="list-group-item">
+                                                            <b>Référence:</b> <?= ucwords($p['reference'], '-') ?>
+                                                        </li>
+
+                                                        <li class="list-group-item">
+                                                            <b>Désignation:</b>
+                                                            <p>
+                                                                <?= ucwords($p['designation']) ?> - <?= ucwords($p['couleur_nom']) ?>
+                                                            </p>
+                                                        </li>
+
+                                                        <li class="list-group-item">
+                                                            <b>Prix:</b>
+                                                            <span class="fw-bold">
+                                                                <?= $p['prix_decimale'] ?> DH
+                                                            </span>
+
+                                                        </li>
+
+                                                        <li class="list-group-item">
+                                                            <b>Catégorie:</b>
+                                                            <span class="fw-bold">
+                                                                <?= ucwords($p['categorie_nom']) ?>
+                                                            </span>
+
+                                                        </li>
+
+                                                    </ul>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="button" class="btn btn-link btn-sm" data-bs-toggle="modal" data-bs-target="#update_produit_<?= $p['id'] ?>">
+                                Modifier
+                            </button>
+
+                            <div class="modal fade" id="update_produit_<?= $p['id'] ?>" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h1 class="modal-title fs-5">
+                                                Modifier produits
+                                            </h1>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <form method="post" enctype="multipart/form-data">
+                                            <div class="modal-body">
+
+                                                <div class="row">
+                                                    <div class="col-md-4">
+                                                        <div class="mb-3">
+                                                            <label for="reference" class="form-label">Référence:</label>
+                                                            <input type="text" class="form-control" id="reference" name="reference" placeholder="Référence:" value="<?= $p['reference'] ?>">
+                                                        </div>
+                                                    </div>
+                                                    <!-- col -->
+
+                                                    <div class="col-md-4">
+                                                        <div class="mb-3">
+                                                            <label for="designation" class="form-label">Désignation:</label>
+                                                            <input type="text" class="form-control" id="designation" name="designation" placeholder="Désignation:" value="<?= $p['designation'] ?>">
+                                                        </div>
+                                                    </div>
+                                                    <!-- col -->
+
+                                                    <div class="col-md-4">
+                                                        <div class="mb-3">
+                                                            <label for="prix_u" class="form-label">Prix U:</label>
+                                                            <input type="number" class="form-control" id="prix_u" name="prix_u" placeholder="Prix U:" value="<?= $p['prix'] / 100 ?>">
+                                                        </div>
+                                                    </div>
+                                                    <!-- col -->
+
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label for="categorie_id" class="form-label">
+                                                                Catégories:
+                                                            </label>
+
+                                                            <select name="categorie_id" class="form-select">
+                                                                <?php foreach ($categories as $key => $c) : ?>
+                                                                    <option <?php
+                                                                            // if ($c['id'] == $p['categorie_id']) {
+                                                                            //     echo 'selected';
+                                                                            // } else {
+                                                                            //     echo '';
+                                                                            // }
+                                                                            ?> <?= $c['id'] == $p['categorie_id'] ? 'selected' : '' ?> value="<?= $c['id'] ?>">
+                                                                        <?= ucwords($c['nom']) ?>
+                                                                    </option>
+                                                                <?php endforeach ?>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <!-- col -->
+
+
+
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label for="couleur_id" class="form-label">
+                                                                Couleurs:
+                                                            </label>
+
+                                                            <select name="couleur_id" class="form-select">
+                                                                <?php foreach ($couleurs as $key => $c) : ?>
+                                                                    <option <?= $c['id'] == $p['couleur_id'] ? 'selected' : '' ?> value="<?= $c['id'] ?>">
+                                                                        <?= ucwords($c['nom']) ?>
+                                                                    </option>
+                                                                <?php endforeach ?>
+                                                            </select>
+
+                                                        </div>
+                                                    </div>
+                                                    <!-- col -->
+
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label for="Photo" class="form-label">Photo:</label>
+                                                            <input type="file" name="image" class="form-control">
+                                                        </div>
+                                                    </div>
+                                                    <!-- col -->
+
+                                                    <div class="col-md-6">
+                                                        <img src="images/produits/<?= $p['image'] ?>" width="60" alt="">
+                                                    </div>
+                                                </div>
+                                                <!-- row -->
+                                            </div>
+                                            <!-- modal-body -->
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+
+                                                <input type="hidden" name="produit_id" value="<?= $p['id'] ?>">
+                                                <input type="hidden" name="image_name" value="<?= $p['image'] ?>">
+
+                                                <button type="submit" name="update_product" class="btn btn-primary">
+                                                    Modifier
+                                                </button>
+                                            </div>
+                                            <!-- modal-footer -->
+                                        </form>
+
+                                    </div>
+                                    <!-- modal-content -->
+                                </div>
+                                <!-- modal-dialog -->
+                            </div>
+                            <!-- modal -->
                             <a href="" class="btn btn-link btn-sm">Supprimer</a>
                         </td>
                     </tr>

@@ -6,8 +6,32 @@ $title = "Commandes";
 
 
 if (isset($_POST['add_order'])) {
-    dd($_POST);
+
+    $num = (int)$_POST['num'];
+    $date_commande = e($_POST['date_commande']);
+    $client_id = (int)$_POST['client_id'];
+    $status_id = (int)$_POST['status_id'];
+
+    $commande = $pdo->prepare("INSERT INTO commandes SET num = :num, date_commande = :date_commande, client_id = :client_id, status_id = :status_id");
+
+    $commande->execute(
+        [
+            'num' => $num, 'date_commande' => $date_commande, 'client_id' => $client_id, 'status_id' => $status_id
+        ]
+    );
+
+    if ($commande) {
+        $_SESSION['flash']['info'] = 'Bien ajouter';
+    } else {
+        $_SESSION['flash']['danger'] = 'Error !!!';
+    }
+
+    header('Location: commandes');
+    exit();
 }
+
+
+$last_order_num = $pdo->query("SELECT max(num) As last_num FROM commandes_view limit 1")->fetch()['last_num'] + 1;
 
 $commandes = $pdo->query("SELECT * FROM commandes_view ORDER BY date_commande DESC")->fetchAll();
 
@@ -61,7 +85,7 @@ ob_start(); ?>
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="num" class="form-label">Numéro:</label>
-                                        <input type="number" class="form-control" id="num" name="num" placeholder="Numéro:">
+                                        <input type="number" class="form-control" id="num" name="num" placeholder="Numéro:" value="<?= $last_order_num ?>">
                                     </div>
                                 </div>
                                 <!-- col -->
@@ -69,18 +93,18 @@ ob_start(); ?>
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="date_commande" class="form-label">Date commande:</label>
-                                        <input type="date" class="form-control" id="date_commande" name="date_commande">
+                                        <input type="date" class="form-control" id="date_commande" name="date_commande" value="<?= date('Y-m-d') ?>">
                                     </div>
                                 </div>
                                 <!-- col -->
 
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="categorie_id" class="form-label">
+                                        <label for="client_id" class="form-label">
                                             Clients:
                                         </label>
 
-                                        <select name="categorie_id" class="form-select">
+                                        <select name="client_id" class="form-select">
                                             <?php foreach ($clients as $key => $c) : ?>
                                                 <option value="<?= $c['id'] ?>">
                                                     <?= ucwords($c['nom']) ?>
@@ -93,11 +117,11 @@ ob_start(); ?>
 
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="categorie_id" class="form-label">
+                                        <label for="status_id" class="form-label">
                                             Status:
                                         </label>
 
-                                        <select name="categorie_id" class="form-select">
+                                        <select name="status_id" class="form-select">
                                             <?php foreach ($status as $key => $s) : ?>
                                                 <option value="<?= $s['id'] ?>">
                                                     <?= ucwords($s['nom']) ?>
