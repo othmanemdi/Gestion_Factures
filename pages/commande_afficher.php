@@ -52,11 +52,42 @@ if (isset($_POST['product_add'])) {
     exit();
 }
 
+if (isset($_POST['product_update'])) {
+
+
+    $commande_produit_id = (int)$_POST['commande_produit_id'];
+    $quantite = (int)$_POST['quantite'];
+
+    if ($quantite <= 0) {
+        $_SESSION['flash']['danger'] = 'Error quantité !!!';
+    }
+
+
+    $req = $pdo->prepare("UPDATE commande_produit SET
+      quantite = :quantite
+      WHERE id = :commande_produit_id
+      ");
+
+    $req->execute(
+        [
+            'quantite' => $quantite,
+            'commande_produit_id' => $commande_produit_id,
+        ]
+    );
+
+    if ($req) {
+        $_SESSION['flash']['info'] = 'Bien modifer';
+    } else {
+        $_SESSION['flash']['danger'] = 'Error !!!';
+    }
+
+    header('Location: commande_afficher&id=' . $commande_id);
+    exit();
+}
 
 
 
-
-$commande = $pdo->prepare("SELECT id FROM commandes WHERE id = :commande_id limit 1");
+$commande = $pdo->prepare("SELECT * FROM commandes_view WHERE id = :commande_id limit 1");
 
 $commande->execute(
     [
@@ -64,15 +95,12 @@ $commande->execute(
     ]
 );
 
-if (!$commande->fetch()) {
+$commande = $commande->fetch();
+if (!$commande) {
     $_SESSION['flash']['danger'] = 'Id introuvable dans la base de données';
     header('Location: commandes');
     exit();
 }
-
-$commande = $pdo->query("SELECT * FROM commandes_view WHERE id = $commande_id LIMIT 1")->fetch();
-
-
 
 
 $commande_produits_req = $pdo->prepare("SELECT * FROM commande_produits_view WHERE commande_id = :commande_id ORDER BY id DESC");
@@ -110,7 +138,7 @@ ob_start(); ?>
 
 
 
-<div class="card">
+<div class="card <?= $commande['status_id'] == 4 ? 'border-danger' : '' ?>">
     <div class="card-header">
         <h6 class="fw-bold">
             Détails de la commande N° <?= $commande['commande_num'] ?>
@@ -120,15 +148,24 @@ ob_start(); ?>
     <div class="card-body">
 
         <dl class="row">
-            <dt class="col-sm-3">Numéro de commande</dt>
+            <dt class="col-sm-3">Numéro de commande:</dt>
             <dd class="col-sm-9"><?= $commande['commande_num'] ?></dd>
 
-            <dt class="col-sm-3">Date de commande</dt>
+            <dt class="col-sm-3">Date de commande:</dt>
             <dd class="col-sm-9"><?= $commande['date_commande_format'] ?></dd>
 
 
-            <dt class="col-sm-3">Client</dt>
+            <dt class="col-sm-3">Client:</dt>
             <dd class="col-sm-9"><?= ucwords($commande['client_nom']) ?></dd>
+
+
+            <dt class="col-sm-3">Status:</dt>
+            <dd class="col-sm-9">
+                <span class="badge bg-<?= $commande['status_color'] ?>">
+                    <?= ucwords($commande['status_nom']) ?>
+                </span>
+            </dd>
+
 
 
         </dl>
@@ -220,7 +257,39 @@ ob_start(); ?>
                         <td><?= $p['quantite'] ?></td>
                         <td><?= $p['prix_total'] ?> DH</td>
                         <td>
-                            <a href="" class="btn btn-link btn-sm">Modifier</a>
+
+
+                            <button type="button" class="btn btn-link btn-sm" data-bs-toggle="modal" data-bs-target="#update_product_<?= $p['id'] ?>">
+                                Modifier
+                            </button>
+
+                            <div class="modal fade" id="update_product_<?= $p['id'] ?>" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-sm">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h1 class="modal-title fs-5">
+                                                Modifier la quantité
+                                            </h1>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <form method="post">
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <label for="quantite" class="form-label">Quantité</label>
+                                                    <input type="number" class="form-control" name="quantite" id="quantite" placeholder="Quantité:" value="<?= $p['quantite'] ?>">
+                                                </div>
+                                                <!-- mb-3 -->
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                                <input type="hidden" name="commande_produit_id" value="<?= $p['id'] ?>">
+                                                <button type="submit" name="product_update" class="btn btn-success">Modifier</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
                         </td>
                     </tr>
 

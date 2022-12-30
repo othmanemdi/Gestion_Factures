@@ -1,0 +1,15 @@
+Dashboard
+Product SoftDelete
+Product Show image
+view product deleted_at is not null
+Modifer la commande
+Annuler la commande
+
+(commande_afficher) status commande
+if status annuler border danger
+(commande_afficher) modifer produits
+Export database
+
+----------------------------------------------------
+(commande_afficher) fw-bold to tr update
+Facture CRUD

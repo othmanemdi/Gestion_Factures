@@ -80,6 +80,43 @@ if (isset($_POST['supprimer_client'])) {
 
     // $client = $pdo->query("UPDATE clients SET deleted_at = NOW() WHERE id = $client_id");
 
+    $commande = $pdo->prepare("SELECT count(id) As count_order FROM commandes WHERE client_id = :client_id LIMIT 1");
+
+    $commande->execute(
+        [
+            'client_id' => $client_id
+        ]
+    );
+
+    $check_if_client_has_an_order = $commande->fetch();
+
+    if (!$check_if_client_has_an_order) {
+
+        $client = $pdo->prepare("UPDATE clients SET deleted_at = NOW() WHERE id = :client_id");
+
+        $client->execute(
+            [
+                'client_id' => $client_id
+            ]
+        );
+        if ($client) {
+            $_SESSION['flash']['info'] = 'Bien supprimer';
+        } else {
+            $_SESSION['flash']['danger'] = 'Error !!!';
+        }
+    } else {
+        $_SESSION['flash']['danger'] = "Error client has " . $check_if_client_has_an_order['count_order'] . " order(s) !!!";
+    }
+
+    header('Location: clients');
+    exit();
+}
+
+// Delete client and his orders
+/*if (isset($_POST['supprimer_client_2'])) {
+
+    $client_id = (int) $_POST['client_id'];
+
     $client = $pdo->prepare("UPDATE clients SET deleted_at = NOW() WHERE id = :client_id");
 
     $client->execute(
@@ -88,15 +125,23 @@ if (isset($_POST['supprimer_client'])) {
         ]
     );
 
+    $client = $pdo->prepare("UPDATE commandes SET deleted_at = NOW() WHERE client_id = :client_id");
+
+    $client->execute(
+        [
+            'client_id' => $client_id
+        ]
+    );
     if ($client) {
         $_SESSION['flash']['info'] = 'Bien supprimer';
     } else {
         $_SESSION['flash']['danger'] = 'Error !!!';
     }
 
+
     header('Location: clients');
     exit();
-}
+}*/
 
 $search = '';
 

@@ -116,7 +116,7 @@ if (isset($_POST['add_product'])) {
 
 if (isset($_POST['update_product'])) {
 
-    $produit_id = e($_POST['produit_id']);
+    $produit_id = (int)$_POST['produit_id'];
     $image_name = e($_POST['image_name']);
 
     $reference = e($_POST['reference']);
@@ -215,6 +215,27 @@ if (isset($_POST['update_product'])) {
     exit();
 }
 
+
+if (isset($_POST['delete_product'])) {
+    $produit_id = (int)$_POST['produit_id'];
+
+    $produit = $pdo->prepare("UPDATE produits SET deleted_at = NOW() WHERE id = :produit_id");
+
+    $produit->execute(
+        [
+            'produit_id' => $produit_id
+        ]
+    );
+
+    if ($produit) {
+        $_SESSION['flash']['info'] = 'Bien supprimer';
+    } else {
+        $_SESSION['flash']['danger'] = 'Error !!!';
+    }
+
+    header('Location: produits');
+    exit();
+}
 
 
 // $produits = $pdo->query("SELECT
@@ -377,7 +398,37 @@ ob_start(); ?>
                     <tr>
                         <td><?= $p['id'] ?></td>
                         <td>
-                            <img src="images/produits/<?= $p['image'] ?>" width="30" alt="">
+
+                            <img data-bs-toggle="modal" data-bs-target="#show_image<?= $p['id'] ?>" src="images/produits/<?= $p['image'] ?>" width="30" alt="" style="cursor:pointer">
+
+                            <div class="modal fade" id="show_image<?= $p['id'] ?>" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h1 class="modal-title fs-5">
+                                                <?= ucwords($p['designation']) ?> - <?= ucwords($p['couleur_nom']) ?>
+
+                                            </h1>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body text-center">
+
+                                            <img width="400" src="images/produits/<?= $p['image'] ?>" alt="" class='img-fluid'>
+
+                                        </div>
+                                        <!-- modal-body -->
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                        </div>
+                                        <!-- modal-footer -->
+
+
+                                    </div>
+                                    <!-- modal-content -->
+                                </div>
+                                <!-- modal-dialog -->
+                            </div>
+                            <!-- modal -->
                         </td>
                         <td><?= ucwords($p['reference'], '-') ?></td>
                         <td><?= ucwords($p['designation']) ?> - <?= ucwords($p['couleur_nom']) ?></td>
@@ -571,7 +622,47 @@ ob_start(); ?>
                                 <!-- modal-dialog -->
                             </div>
                             <!-- modal -->
-                            <a href="" class="btn btn-link btn-sm">Supprimer</a>
+
+                            <button type="button" class="btn btn-link btn-sm" data-bs-toggle="modal" data-bs-target="#delete_product_<?= $p['id'] ?>">
+                                Supprimer
+                            </button>
+
+                            <div class="modal fade" id="delete_product_<?= $p['id'] ?>" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h1 class="modal-title fs-5">
+                                                Supprimer
+                                            </h1>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <form method="post">
+                                            <div class="modal-body">
+
+                                                <h5 class="text-danger fw-bold">
+                                                    Voulez vous vraiment supprimer <?= ucwords($p['designation']) ?> - <?= ucwords($p['couleur_nom']) ?> ?
+                                                </h5>
+
+                                            </div>
+                                            <!-- modal-body -->
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                                <input type="hidden" name="produit_id" value="<?= $p['id'] ?>">
+                                                <button type="submit" name="delete_product" class="btn btn-danger">
+                                                    Supprimer
+                                                </button>
+
+                                            </div>
+                                            <!-- modal-footer -->
+
+                                        </form>
+
+                                    </div>
+                                    <!-- modal-content -->
+                                </div>
+                                <!-- modal-dialog -->
+                            </div>
+                            <!-- modal -->
                         </td>
                     </tr>
                 <?php endforeach ?>
