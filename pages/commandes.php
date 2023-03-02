@@ -250,6 +250,9 @@ ob_start(); ?>
                             </span>
                         </td>
                         <td>
+                            <a href="order_details&id=<?= $c['id'] ?>" class="btn btn-link btn-sm">Show</a>
+
+
                             <a href="commande_afficher&id=<?= $c['id'] ?>" class="btn btn-link btn-sm">Afficher</a>
 
                             <button type="button" class="btn btn-link btn-sm" data-bs-toggle="modal" data-bs-target="#update_order_<?= $c['id'] ?>">

@@ -250,7 +250,7 @@ if (isset($_POST['delete_product'])) {
 
 $categories = $pdo->query("SELECT * FROM categories WHERE deleted_at IS NULL")->fetchAll();
 $couleurs = $pdo->query("SELECT * FROM couleurs WHERE deleted_at IS NULL")->fetchAll();
-$produits = $pdo->query("SELECT * FROM produits_view")->fetchAll();
+$produits = $pdo->query("SELECT * FROM produits_view ORDER BY id DESC")->fetchAll();
 
 
 $content_php = ob_get_clean();

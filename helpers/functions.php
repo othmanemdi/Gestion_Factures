@@ -69,6 +69,13 @@ function get_price($value, $qt = 1): float
 if (!function_exists('_date_format_year')) {
     function _date_format_year($date)
     {
-        return date("Y", strtotime($date));
+        return date("y", strtotime($date));
+    }
+}
+
+if (!function_exists('_date_format')) {
+    function _date_format($date)
+    {
+        return date("d/m/Y", strtotime($date));
     }
 }

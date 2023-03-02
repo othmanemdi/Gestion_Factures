@@ -189,7 +189,7 @@ ob_start(); ?>
                                 <div class="col">
                                     <div class="mb-3">
                                         <label for="produit_id" class="form-label">Produits</label>
-                                        <select name="produit_id" id="produit_id" class="form-control">
+                                        <select name="produit_id" id="produit_id" class="form-select">
                                             <?php foreach ($produits as $key => $p) : ?>
                                                 <option value="<?= $p['id'] ?>"><?= ucwords($p['reference'], '-') ?></option>
                                             <?php endforeach ?>
@@ -249,7 +249,37 @@ ob_start(); ?>
                     <tr>
                         <td><?= $p['id'] ?></td>
                         <td>
-                            <img src="images/produits/<?= $p['image'] ?>" width="30" alt="">
+
+                            <img data-bs-toggle="modal" data-bs-target="#show_image<?= $p['id'] ?>" src="images/produits/<?= $p['image'] ?>" width="30" alt="" style="cursor:pointer">
+
+                            <div class="modal fade" id="show_image<?= $p['id'] ?>" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h1 class="modal-title fs-5">
+                                                <?= ucwords($p['designation']) ?> - <?= ucwords($p['couleur_nom']) ?>
+
+                                            </h1>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body text-center">
+
+                                            <img width="400" src="images/produits/<?= $p['image'] ?>" alt="" class='img-fluid'>
+
+                                        </div>
+                                        <!-- modal-body -->
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                        </div>
+                                        <!-- modal-footer -->
+
+
+                                    </div>
+                                    <!-- modal-content -->
+                                </div>
+                                <!-- modal-dialog -->
+                            </div>
+                            <!-- modal -->
                         </td>
                         <td><?= ucwords($p['reference'], '-') ?></td>
                         <td><?= ucwords($p['designation']) ?> - <?= ucwords($p['couleur_nom']) ?> <?= ucwords($p['categorie_nom']) ?></td>
@@ -312,9 +342,19 @@ ob_start(); ?>
                         <td><?= $qt_total ?> Quantité<?= $qt_total > 1 ? 's' : '' ?></td>
                     </tr>
 
+                    <?php if ($commande['coupon_montant'] != 0) : ?>
+                        <tr>
+                            <th>Remise:</th>
+                            <td>
+                                <?= strtoupper($commande['coupon_code']) ?>:
+                                (-<?= _number_format($commande['coupon_montant']) ?> DH)
+                            </td>
+                        </tr>
+                    <?php endif ?>
+
                     <tr>
                         <th>Prix total:</th>
-                        <td><?= _number_format($prix_total) ?> DH</td>
+                        <td><?= _number_format($prix_total - $commande['coupon_montant']) ?> DH</td>
                     </tr>
                 </table>
             </div>
