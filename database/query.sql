@@ -136,4 +136,4 @@ SELECT
 	cp.commande_id
 FROM
 	commande_produit cp
-	LEFT JOIN produits_view pv ON pv.id = cp.p PRODUIT_ID;
+	LEFT JOIN produits_view pv ON pv.id = cp.produit_id
