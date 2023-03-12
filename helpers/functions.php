@@ -79,3 +79,44 @@ if (!function_exists('_date_format')) {
         return date("d/m/Y", strtotime($date));
     }
 }
+
+if (!function_exists('_get_months')) {
+    function _get_months()
+    {
+        return [
+            1 => 'Janvier',
+            2 => 'Février',
+            3 => 'Mars',
+            4 => 'Avril',
+            5 => 'Mai',
+            6 => 'Juin',
+            7 => 'Juillet',
+            8 => 'Août',
+            9 => 'Septembre',
+            10 => 'Octobre',
+            11 => 'Novembre',
+            12 => 'Décembre'
+        ];
+    }
+}
+
+
+if (!function_exists('_get_months_short')) {
+    function _get_months_short()
+    {
+        return [
+            1 => 'Jan',
+            2 => 'Fév',
+            3 => 'Mar',
+            4 => 'Avr',
+            5 => 'Mai',
+            6 => 'Jui',
+            7 => 'Juil',
+            8 => 'Aoû',
+            9 => 'Sep',
+            10 => 'Oct',
+            11 => 'Nov',
+            12 => 'Déc'
+        ];
+    }
+}

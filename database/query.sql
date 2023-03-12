@@ -90,7 +90,8 @@ SELECT
 	LOWER(s.nom) AS status_nom,
 	LOWER(s.color) AS status_color,
 	IFNULL(cp.code, '') AS coupon_code,
-	IFNULL(cp.montant, 0) AS coupon_montant
+	IFNULL(cp.montant, 0) AS coupon_montant,
+	IFNULL(cp.status, 0) AS coupon_active
 FROM
 	commandes c
 	LEFT JOIN clients cl ON cl.id = c.client_id

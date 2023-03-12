@@ -10,6 +10,26 @@ $total_clients = $pdo->query("SELECT count(id) As total_clients from commandes w
 
 $total_commandes = $pdo->query("SELECT count(id) As total_commandes from commandes where status_id != 4 LIMIT 1")->fetch()['total_commandes'];
 
+$result = $pdo->query("SELECT 
+    MONTH(cv.date_commande) AS mois,
+    SUM(CASE WHEN cv.coupon_active=1 THEN cv.coupon_montant ELSE 0 END) As coupon_montant,
+    sum((cp.prix / 100) * cp.quantite) AS prix_total_sans_coupon,
+    sum((cp.prix / 100) * cp.quantite) - SUM(CASE WHEN cv.coupon_active=1 THEN cv.coupon_montant ELSE 0 END) AS prix_total_avec_coupon   
+    FROM commande_produits_view cp
+    LEFT JOIN commandes_view cv ON cv.id = cp.commande_id
+    WHERE cv.status_id = 3
+GROUP BY MONTH(cv.date_commande)
+ORDER BY MONTH(cv.date_commande) DESC
+")->fetchAll();
+
+
+
+
+
+
+
+dd($result);
+
 $total_factures = 0;
 
 $content_php = ob_get_clean();
@@ -68,7 +88,7 @@ ob_start(); ?>
 
 
 <div class="row mt-3">
-    <div class="col-md-12">
+    <div class="col-md-6">
         <div class="card">
             <div class="card-header">
                 <h5>
@@ -87,7 +107,9 @@ ob_start(); ?>
             new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: ['Janvier', 'Férvier', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août'],
+                    labels: [<?php foreach (_get_months_short() as $key => $value) :
+                                    echo "'" . $value . "',";
+                                endforeach ?>],
                     datasets: [{
                         label: 'Statistique monsuelle',
                         data: [50000, 65000, 78000, 90000, 75000, 45000, 95000, 1000],
@@ -133,7 +155,22 @@ ob_start(); ?>
         </script>
 
     </div>
-</div>
 
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>
+                    Statistique par catégories
+                </h5>
+            </div>
+            <div class="card-body" weight="200" height="200">
+                <canvas id="myChart2"></canvas>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+<BR></BR><BR></BR><BR></BR><BR></BR><BR></BR><BR></BR><BR></BR><BR></BR><BR></BR><BR></BR>
 
 <?php $content_html = ob_get_clean(); ?>
