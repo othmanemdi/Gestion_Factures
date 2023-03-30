@@ -15,6 +15,10 @@
                 </li>
 
                 <li class="nav-item">
+                    <a class="nav-link <?= $page == "dossier_clients" ? 'text-info fw-bold' : "" ?>" href="dossier_clients">Dossier Clients</a>
+                </li>
+
+                <li class="nav-item">
                     <a class="nav-link <?= $page == "produits" ? 'text-info fw-bold' : "" ?>" href="produits">Produits</a>
                 </li>
 

@@ -10,26 +10,54 @@ $total_clients = $pdo->query("SELECT count(id) As total_clients from commandes w
 
 $total_commandes = $pdo->query("SELECT count(id) As total_commandes from commandes where status_id != 4 LIMIT 1")->fetch()['total_commandes'];
 
+
+
+
 $result = $pdo->query("SELECT 
     MONTH(cv.date_commande) AS mois,
-    SUM(CASE WHEN cv.coupon_active=1 THEN cv.coupon_montant ELSE 0 END) As coupon_montant,
-    sum((cp.prix / 100) * cp.quantite) AS prix_total_sans_coupon,
-    sum((cp.prix / 100) * cp.quantite) - SUM(CASE WHEN cv.coupon_active=1 THEN cv.coupon_montant ELSE 0 END) AS prix_total_avec_coupon   
-    FROM commande_produits_view cp
-    LEFT JOIN commandes_view cv ON cv.id = cp.commande_id
+    -- SUM(DISTINCT CASE WHEN cv.coupon_active=1 THEN cv.coupon_montant ELSE 0 END) As coupon_montant,
+    -- sum((cp.prix / 100) * cp.quantite) AS prix_total_sans_coupon,
+    sum((cp.prix / 100) * cp.quantite) - SUM(DISTINCT  CASE WHEN cv.coupon_active=1 THEN cv.coupon_montant ELSE 0 END) AS prix_total_avec_coupon   
+    -- FROM commande_produits_view cp
+    -- LEFT JOIN commandes_view cv ON cv.id = cp.commande_id
+    FROM commandes_view cv
+    LEFT JOIN commande_produits_view cp ON cp.commande_id = cv.id
     WHERE cv.status_id = 3
 GROUP BY MONTH(cv.date_commande)
 ORDER BY MONTH(cv.date_commande) DESC
 ")->fetchAll();
 
+$result2 = $pdo->query("SELECT 
+    MONTH(cv.date_commande) AS mois,
+    SUM(CASE WHEN cv.coupon_active = 1 THEN cv.coupon_montant ELSE 0 END) As coupon_montant
+    FROM commandes_view cv
+    -- LEFT JOIN commande_produits_view cp ON cp.commande_id = cv.id
+    WHERE cv.status_id = 3
+GROUP BY MONTH(cv.date_commande)
+ORDER BY MONTH(cv.date_commande) DESC
+")->fetchAll();
 
+$statistique_mensuel = [];
 
+foreach (_get_months_short() as $mois_num => $mois_nom) {
+    $statistique_mensuel[$mois_num]['mois'] = $mois_nom;
+    foreach ($result as $r) {
 
-
-
-
-dd($result);
-
+        if ($mois_num == $r['mois']) {
+            $statistique_mensuel[$mois_num]['prix_total'] = $r['prix_total_avec_coupon'];
+            break;
+        } else {
+            $statistique_mensuel[$mois_num]['prix_total'] = 0;
+        }
+    }
+}
+// dd($statistique_mensuel);
+// exit;
+// dd($result);
+// dd($result2);
+// exit;
+// dd($statistique_mensuel);
+// exit;
 $total_factures = 0;
 
 $content_php = ob_get_clean();
