@@ -10,7 +10,7 @@ function dd($array)
     echo "<pre>";
     print_r($array);
     echo "</pre>";
-    // exit();
+    exit();
 }
 
 function array_to_json($array): string

@@ -55,7 +55,8 @@ LEFT JOIN commandes c ON c.id = cp.commande_id
 LEFT JOIN clients cl ON cl.id = c.client_id
 WHERE cl.id = $client_id
 LIMIT 1
-")->fetch()['total_prix'];
+")->fetch()['total_prix'] ?? 0;
+
 
 $content_php = ob_get_clean();
 
@@ -79,7 +80,7 @@ ob_start(); ?>
 <div class="row">
 
 
-    <div class="col-md-3">
+    <div class="col-md-3" data-aos="fade-right" data-aos-easing="ease-out-cubic" data-aos-duration="2000">
         <div class="card card-body">
             <h5>Total Commandes</h5>
             <h6 class="text-end">
@@ -90,7 +91,7 @@ ob_start(); ?>
     </div>
     <!-- col -->
 
-    <div class="col-md-3">
+    <div class="col-md-3" data-aos="fade-up" data-aos-easing="ease-out-cubic" data-aos-duration="2000">
         <div class="card card-body">
             <h5>Total Produits</h5>
             <h6 class="text-end">
@@ -103,7 +104,7 @@ ob_start(); ?>
 
 
 
-    <div class="col-md-3">
+    <div class="col-md-3" data-aos="fade-down" data-aos-easing="ease-out-cubic" data-aos-duration="2000">
         <div class="card card-body">
             <h5>Prix total</h5>
             <h6 class="text-end">
@@ -114,7 +115,7 @@ ob_start(); ?>
     </div>
     <!-- col -->
 
-    <div class="col-md-3">
+    <div class="col-md-3" data-aos="fade-left" data-aos-easing="ease-out-cubic" data-aos-duration="2000">
         <div class="card card-body">
             <h5>Total Factures</h5>
             <h6 class="text-end">
@@ -164,46 +165,63 @@ ob_start(); ?>
 
     <div class="col-md-6">
 
+
         <div class="card">
             <div class="card-header">
                 Liste des commandes
             </div>
             <!-- card-header -->
             <div class="card-body">
-                <div class="list-group">
-                    <?php foreach ($commandes_client as $key => $c) : ?>
+                <?php // if (!empty($commandes_client)) :
+                ?>
 
-                        <?php
+                <?php if (count($commandes_client) > 0) :  ?>
 
-                        switch ($c['status_color']) {
-                            case 'danger':
-                                $class = "text-danger fw-bold";
-                                break;
+                    <div class="list-group">
+                        <?php foreach ($commandes_client as $key => $c) : ?>
 
-                            case 'success':
-                                $class = "text-success fw-bold";
-                                break;
+                            <?php
 
-                            case 'warning':
-                                $class = "text-warning fw-bold";
-                                break;
+                            switch ($c['status_color']) {
+                                case 'danger':
+                                    $class = "text-danger fw-bold";
+                                    break;
 
-                            default:
-                                $class = "";
-                                break;
-                        }
-                        ?>
+                                case 'success':
+                                    $class = "text-success fw-bold";
+                                    break;
 
-                        <a href="commande_afficher&id=<?= $c['id'] ?>" class="list-group-item list-group-item-action <?= $class  ?>">
-                            Commande N° <?= $c['commande_num'] ?>
-                            sur la date du <?= $c['date_commande_format'] ?>
-                            <span class="badge bg-<?= $c['status_color'] ?>">
-                                <?= ucwords($c['status_nom']) ?>
-                            </span>
-                        </a>
-                    <?php endforeach ?>
+                                case 'warning':
+                                    $class = "text-warning fw-bold";
+                                    break;
 
-                </div>
+                                default:
+                                    $class = "";
+                                    break;
+                            }
+                            ?>
+
+                            <a href="commande_afficher&id=<?= $c['id'] ?>" class="list-group-item list-group-item-action <?= $class  ?>">
+                                Commande N° <?= $c['commande_num'] ?>
+                                sur la date du <?= $c['date_commande_format'] ?>
+                                <span class="badge bg-<?= $c['status_color'] ?>">
+                                    <?= ucwords($c['status_nom']) ?>
+                                </span>
+                            </a>
+                        <?php endforeach ?>
+
+                    </div>
+
+
+                <?php else : ?>
+
+                    <div class="text-center">
+                        <img data-aos="flip-left" data-aos-easing="ease-out-cubic" data-aos-duration="2000" width="200" src="images/illustration/no_data.png" alt="">
+                        <h4>Aucune commande trouvée</h4>
+                    </div>
+
+                <?php endif ?>
+
             </div>
             <!-- card-body -->
         </div>
@@ -214,8 +232,9 @@ ob_start(); ?>
 <!-- row -->
 
 
-
-
+<script>
+    AOS.init();
+</script>
 
 
 <?php $content_html = ob_get_clean(); ?>

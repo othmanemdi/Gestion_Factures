@@ -19,6 +19,14 @@
                 </li>
 
                 <li class="nav-item">
+                    <a class="nav-link <?= $page == "categories" ? 'text-info fw-bold' : "" ?>" href="categories">Catégories</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link <?= $page == "couleurs" ? 'text-info fw-bold' : "" ?>" href="couleurs">Couleurs</a>
+                </li>
+
+                <li class="nav-item">
                     <a class="nav-link <?= $page == "produits" ? 'text-info fw-bold' : "" ?>" href="produits">Produits</a>
                 </li>
 
