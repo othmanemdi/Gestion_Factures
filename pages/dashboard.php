@@ -4,11 +4,11 @@ ob_start();
 // php
 $title = "Tableau de bord";
 
-$total_produits = $pdo->query("SELECT count(id) As total_produits from produits LIMIT 1")->fetch()['total_produits'];
+$total_produits = $pdo->query("SELECT count(id) As total_produits from produits LIMIT 1")->fetch()['total_produits'] ?? 0;
 
-$total_clients = $pdo->query("SELECT count(id) As total_clients from commandes where status_id != 4 GROUP BY client_id LIMIT 1")->fetch()['total_clients'];
+$total_clients = $pdo->query("SELECT count(id) As total_clients from commandes where status_id != 4 GROUP BY client_id LIMIT 1")->fetch()['total_clients'] ?? 0;
 
-$total_commandes = $pdo->query("SELECT count(id) As total_commandes from commandes where status_id != 4 LIMIT 1")->fetch()['total_commandes'];
+$total_commandes = $pdo->query("SELECT count(id) As total_commandes from commandes where status_id != 4 LIMIT 1")->fetch()['total_commandes'] ?? 0;
 
 
 

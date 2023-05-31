@@ -296,10 +296,6 @@ ob_start(); ?>
 </script>
 
 
-
-
-
-
 <script>
     // const collor_add = document.getElementById('add_color_modal')
     // collor_add.addEventListener('shown.bs.modal', event => {
@@ -310,7 +306,6 @@ ob_start(); ?>
     //     keyboard: false
     // })
 </script>
-
 
 <!-- 
 $new_stagiaire = $modale_id = 0;
@@ -326,7 +321,6 @@ $classe_id = (int)$_GET['modal_classe_id'];
 $modal_classe_open = true;
 $modale_id = 'modal_classe_' . $classe_id;
 } -->
-
 
 <script>
     // alert(123)
@@ -345,7 +339,5 @@ $modale_id = 'modal_classe_' . $classe_id;
         myModal.show(modalToggle)
     <?php endif */ ?>
 </script>
-
-
 
 <?php $content_html = ob_get_clean(); ?>

@@ -6,6 +6,7 @@ $title = "Clients";
 
 if (isset($_POST['ajouter_client'])) {
 
+    $prenom = e($_POST['prenom']);
     $nom = e($_POST['nom']);
     $num = (int)$_POST['num'];
     $email = e($_POST['email']);
@@ -13,11 +14,12 @@ if (isset($_POST['ajouter_client'])) {
     $telephone = e($_POST['telephone']);
     $adresse = e($_POST['adresse']);
 
-    $client = $pdo->prepare("INSERT INTO clients SET nom = :nom, num = :num,email = :email,ville = :ville, telephone = :telephone, adresse = :adresse ");
+    $client = $pdo->prepare("INSERT INTO clients SET prenom = :prenom, nom = :nom, num = :num,email = :email,ville = :ville, telephone = :telephone, adresse = :adresse,
+     role = :role");
 
     $client->execute(
         [
-            'nom' => $nom, 'num' => $num, 'email' => $email, 'ville' => $ville, 'telephone' => $telephone, 'adresse' => $adresse
+            'prenom' => $prenom, 'nom' => $nom, 'num' => $num, 'email' => $email, 'ville' => $ville, 'telephone' => $telephone, 'adresse' => $adresse, 'role' => 'USER'
         ]
     );
 
@@ -33,6 +35,7 @@ if (isset($_POST['ajouter_client'])) {
 
 if (isset($_POST['modifier_client'])) {
 
+    $prenom = e($_POST['prenom']);
     $nom = e($_POST['nom']);
     $num = (int)$_POST['num'];
     $telephone = (int)$_POST['telephone'];
@@ -43,31 +46,45 @@ if (isset($_POST['modifier_client'])) {
 
     // $client = $pdo->query("UPDATE clients SET nom = '$nom', num = $num, email = '$email',ville = '$ville',telephone = $telephone, adresse = '$adresse' WHERE id = $client_id");
 
-    $client = $pdo->prepare("UPDATE clients SET nom = :nom,
-    num = :num,
-    email = :email,
-    ville = :ville,
-    telephone = :telephone,
-    adresse = :adresse,
-    updated_at = NOW()
-    WHERE id = :id");
+    $client = $pdo->prepare("SELECT id FROM clients WHERE id = :id AND role = :role LIMIT 1");
 
-    $client->execute(
-        [
-            'nom' => $nom,
-            'num' => $num,
-            'email' => $email,
-            'ville' => $ville,
-            'telephone' => $telephone,
-            'adresse' => $adresse,
-            'id' => $client_id
-        ]
-    );
+    $client->execute(['id' => $client_id, 'role' => 'USER']);
 
-    if ($client) {
-        $_SESSION['flash']['info'] = 'Bien modifier';
-    } else {
+    $rows = $client->rowCount();
+
+    if ($rows == 0) {
         $_SESSION['flash']['danger'] = 'Error !!!';
+    } else {
+
+        $client = $pdo->prepare("UPDATE clients SET
+            prenom = :prenom,
+            nom = :nom,
+            num = :num,
+            email = :email,
+            ville = :ville,
+            telephone = :telephone,
+            adresse = :adresse,
+            updated_at = NOW()
+        WHERE 
+            id = :id 
+        AND 
+            role = :role");
+
+        $client->execute(
+            [
+                'prenom' => $prenom,
+                'nom' => $nom,
+                'num' => $num,
+                'email' => $email,
+                'ville' => $ville,
+                'telephone' => $telephone,
+                'adresse' => $adresse,
+                'id' => $client_id,
+                'role' => 'USER'
+            ]
+        );
+
+        $_SESSION['flash']['info'] = 'Bien modifier';
     }
 
     header('Location:clients');
@@ -88,21 +105,29 @@ if (isset($_POST['supprimer_client'])) {
         ]
     );
 
-    $check_if_client_has_an_order = $commande->fetch();
+    $check_if_client_has_an_order = $commande->fetch()['count_order'];
 
     if (!$check_if_client_has_an_order) {
 
-        $client = $pdo->prepare("UPDATE clients SET deleted_at = NOW() WHERE id = :client_id");
+        $client = $pdo->prepare("SELECT id FROM clients WHERE id = :id AND role = :role LIMIT 1");
 
-        $client->execute(
-            [
-                'client_id' => $client_id
-            ]
-        );
-        if ($client) {
-            $_SESSION['flash']['info'] = 'Bien supprimer';
-        } else {
+        $client->execute(['id' => $client_id, 'role' => 'USER']);
+
+        $rows = $client->rowCount();
+
+        if ($rows == 0) {
             $_SESSION['flash']['danger'] = 'Error !!!';
+        } else {
+
+            $client = $pdo->prepare("UPDATE clients SET deleted_at = NOW() WHERE id = :client_id AND role = :role");
+
+            $client->execute(
+                [
+                    'client_id' => $client_id,
+                    'role' => 'USER'
+                ]
+            );
+            $_SESSION['flash']['info'] = 'Bien supprimer';
         }
     } else {
         $_SESSION['flash']['danger'] = "Error client has " . $check_if_client_has_an_order['count_order'] . " order(s) !!!";
@@ -150,7 +175,7 @@ if (isset($_POST['rechercher_client'])) {
     $search =  " AND nom LIKE '%" . $c . "%'";
 }
 
-$clients = $pdo->query("SELECT * FROM clients WHERE deleted_at IS NULL $search ORDER BY id DESC")->fetchAll();
+$clients = $pdo->query("SELECT * FROM clients WHERE role = 'USER' AND deleted_at IS NULL $search ORDER BY id DESC")->fetchAll();
 
 $content_php = ob_get_clean();
 
@@ -213,6 +238,14 @@ ob_start(); ?>
                             <div class="row">
                                 <div class="col-md-4">
                                     <div class="mb-3">
+                                        <label for="prenom" class="form-label">Prénom:</label>
+                                        <input type="text" class="form-control" name="prenom" id="prenom" placeholder="Prénom:">
+                                    </div>
+                                </div>
+                                <!-- col -->
+
+                                <div class="col-md-4">
+                                    <div class="mb-3">
                                         <label for="nom" class="form-label">Nom:</label>
                                         <input type="text" class="form-control" name="nom" id="nom" placeholder="Nom:">
                                     </div>
@@ -235,7 +268,7 @@ ob_start(); ?>
                                 </div>
                                 <!-- col -->
 
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <div class="mb-3">
                                         <label for="ville" class="form-label">Ville:</label>
                                         <input type="text" class="form-control" name="ville" id="ville" placeholder="Ville:">
@@ -243,7 +276,7 @@ ob_start(); ?>
                                 </div>
                                 <!-- col -->
 
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <div class="mb-3">
                                         <label for="tele" class="form-label">Téléphone:</label>
                                         <input type="number" class="form-control" name="telephone" id="tele" placeholder="Téléphone:">
@@ -281,9 +314,10 @@ ob_start(); ?>
 
         <table class="table table-sm table-bordered">
             <thead>
-                <tr class="table-dark <!-- light -->">
+                <tr class="table-dark">
                     <th>Id</th>
                     <th>Num</th>
+                    <th>Prénom</th>
                     <th>Nom</th>
                     <th>Téléphone</th>
                     <th>Email</th>
@@ -301,6 +335,9 @@ ob_start(); ?>
                     </td>
                     <td>
                         C:<?= add_zero($c['num']) ?>
+                    </td>
+                    <td>
+                        <?= ucwords($c['prenom']) ?>
                     </td>
                     <td>
                         <?= ucwords($c['nom']) ?>
@@ -334,6 +371,9 @@ ob_start(); ?>
 
                                     <div class="modal-body">
                                         <dl class="row">
+                                            <dt class="col-sm-3">Prénom:</dt>
+                                            <dd class="col-sm-9"><?= ucwords($c['prenom']) ?></dd>
+
                                             <dt class="col-sm-3">Nom:</dt>
                                             <dd class="col-sm-9"><?= ucwords($c['nom']) ?></dd>
 
@@ -397,6 +437,15 @@ ob_start(); ?>
 
                                                 <div class="col-md-4">
                                                     <div class="mb-3">
+                                                        <label for="prenom" class="form-label">Prénom:</label>
+                                                        <input type="text" class="form-control" name="prenom" id="prenom" placeholder="Prénom:" value="<?= $c['prenom'] ?>">
+                                                    </div>
+                                                </div>
+                                                <!-- col -->
+
+
+                                                <div class="col-md-4">
+                                                    <div class="mb-3">
                                                         <label for="nom" class="form-label">Nom:</label>
                                                         <input type="text" class="form-control" name="nom" id="nom" placeholder="Nom:" value="<?= $c['nom'] ?>">
                                                     </div>
@@ -412,7 +461,7 @@ ob_start(); ?>
                                                 </div>
                                                 <!-- col -->
 
-                                                <div class="col-md-6">
+                                                <div class="col-md-4">
                                                     <div class="mb-3">
                                                         <label for="ville" class="form-label">Ville:</label>
                                                         <input type="text" class="form-control" name="ville" id="ville" placeholder="Ville:" value="<?= $c['ville'] ?>">
@@ -420,7 +469,7 @@ ob_start(); ?>
                                                 </div>
                                                 <!-- col -->
 
-                                                <div class="col-md-6">
+                                                <div class="col-md-4">
                                                     <div class="mb-3">
                                                         <label for="tele" class="form-label">Téléphone:</label>
                                                         <input type="number" class="form-control" name="telephone" id="tele" placeholder="Téléphone:" value="<?= $c['telephone'] ?>">
@@ -439,7 +488,7 @@ ob_start(); ?>
                                                 <!-- col -->
                                             </div>
                                             <!-- row -->
-                                            <input type="hidden" name="client_id" value="<?= $c['id'] ?>">
+                                            <input type="text" name="client_id" value="<?= $c['id'] ?>">
                                         </div>
 
                                         <!-- modal-body -->
@@ -509,8 +558,7 @@ ob_start(); ?>
             </tbody>
         </table>
     </div>
-</div>
-<!-- card-body -->
+    <!-- card-body -->
 </div>
 <!-- card -->
 
