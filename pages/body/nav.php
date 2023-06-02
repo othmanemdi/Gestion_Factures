@@ -42,6 +42,10 @@
                     <a class="nav-link <?= $page == "coupons" ? 'text-info fw-bold' : "" ?>" href="coupon">Coupn</a>
                 </li>
 
+                <li class="nav-item">
+                    <a class="nav-link <?= $page == "roles" ? 'text-info fw-bold' : "" ?>" href="roles">Roles</a>
+                </li>
+
             </ul>
             <ul class="navbar-nav  d-flex">
                 <li class="nav-item">
